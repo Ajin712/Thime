@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --bg:#F3F3F1; --outer:#E4E4E2; --ink:#1c1c1e; --ink2:#55555a; --muted:#a2a2a6; --line:#e3e3e1;
+  --chip:#e9e9e7; --chipOn:#d9d9d7; --paper:#ffffff;
+  --y:#FBE36E; --yTop:#FDF0A8; --o:#F4C27E; --g:#BFEA9D; --b:#D5E3F2; --p:#F6D3D0;
+  --hand:'Nanum Pen Script', 'Gaegu', cursive;
+  --ui:'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--outer);color:var(--ink);font-family:var(--ui)}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,textarea{font-family:inherit;color:inherit}
+#app{overflow-x:hidden;max-width:420px;min-height:100vh;margin:0 auto;background:var(--bg);position:relative;padding:22px 18px 110px;box-shadow:0 0 40px rgba(0,0,0,.06)}
+.hand{font-family:var(--hand)}
+/* header */
+.top{display:flex;align-items:center;gap:10px;margin-bottom:18px;min-height:40px}
+.top h1{font-family:var(--hand);font-size:36px;font-weight:400;line-height:1;flex:1;letter-spacing:-.5px}
+.top .ttl{font-size:19px;font-weight:600;flex:1}
+.ib{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;position:relative}
+.ib:hover{background:rgba(0,0,0,.05)}
+.ib svg{width:23px;height:23px}
+.dot{position:absolute;top:3px;right:2px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center}
+.cnt{background:var(--ink);color:#fff;font-size:12px;font-weight:700;border-radius:8px;padding:3px 9px}
+.row{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px}
+.sub{font-size:17px;color:var(--ink2)}
+.muted{color:var(--muted);font-size:12px}
+.chips{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.chip{background:var(--chip);color:var(--muted);font-size:14px;padding:8px 16px;border-radius:9px}
+.chip.on{background:var(--chipOn);color:var(--ink)}
+.seg{display:flex;background:var(--chip);border-radius:9px;padding:3px}
+.seg button{width:34px;height:28px;border-radius:7px;display:grid;place-items:center;color:var(--muted)}
+.seg button.on{background:var(--chipOn);color:var(--ink)}
+.seg svg{width:16px;height:16px}
+/* pin + sticky */
+.pin{position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:12px;height:26px;z-index:3;pointer-events:none}
+.sticky{position:relative;background:var(--y);box-shadow:0 8px 18px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06)}
+.sticky::before{content:"";position:absolute;left:0;right:0;top:0;height:30px;background:rgba(255,255,255,.38);pointer-events:none}
+.c-y{background:var(--y)}.c-o{background:var(--o)}.c-g{background:var(--g)}.c-b{background:var(--b)}.c-p{background:var(--p)}.c-w{background:var(--paper)}
+/* card stack */
+.stack{position:relative;height:330px;margin:26px 8px 10px 4px;touch-action:pan-y}
+.stack .back{position:absolute;inset:14px -14px -10px 14px;transform:rotate(3deg)}
+.stack .back2{position:absolute;inset:6px -6px -4px 6px;transform:rotate(1.2deg)}
+.stack .front{position:absolute;inset:0;padding:64px 22px 20px;display:flex;flex-direction:column;cursor:pointer;transition:transform .25s}
+.stack .front.swap{transform:translateX(-30px) rotate(-3deg);opacity:.2}
+.front .q{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--hand);font-size:40px;line-height:1.25;color:#3a3a3a;word-break:keep-all}
+.front .foot{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:600}
+.front .use{display:flex;gap:6px;align-items:center;padding:6px 0}
+.front .src{position:absolute;top:36px;left:22px;font-size:12px;color:rgba(0,0,0,.4)}
+.hint{font-size:12px;color:var(--muted);margin:22px 4px 26px;line-height:1.5}
+/* grids */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 16px;padding-top:14px}
+.grid.list{grid-template-columns:minmax(0,1fr)}
+.mini{position:relative;background:var(--paper);min-height:150px;padding:22px 14px 14px;box-shadow:0 6px 14px rgba(0,0,0,.06);text-align:left;display:flex;flex-direction:column;gap:8px;width:100%}
+.mini .mq{font-family:var(--hand);font-size:22px;line-height:1.2;color:#333;flex:1;word-break:keep-all}
+.mini.locked .mq{color:#b9b9bb}
+.mini.open{background:var(--y)}
+.mini .st{font-size:12px;color:var(--ink2);display:flex;gap:5px;align-items:center}
+.mini .st svg{width:13px;height:13px}
+.mini.open .st{font-weight:700;color:var(--ink)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:14px;padding:30px 0}
+/* fab */
+.fab{position:fixed;bottom:28px;left:50%;transform:translateX(calc(min(210px, 50vw) - 100% - 18px));background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.12);border-radius:14px;padding:13px 20px;font-size:16px;font-weight:600;display:flex;gap:8px;align-items:center;z-index:20}
+/* record */
+.recbar{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500}
+.rdot{width:9px;height:9px;border-radius:50%;background:#d33;display:inline-block}
+.rdot.idle{background:#c4c4c6}
+.rdot.live{animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+.bigsticky{margin:30px 4px 0;padding:44px 22px 24px;min-height:300px}
+.prompt{font-size:14px;color:rgba(0,0,0,.45);margin-bottom:10px;position:relative;z-index:1}
+.tx{font-family:var(--hand);font-size:25px;line-height:1.45;min-height:200px;outline:none;position:relative;z-index:1;white-space:pre-wrap;word-break:keep-all;color:#3b3b3b}
+.tx:empty::before{content:attr(data-ph);color:rgba(0,0,0,.3)}
+.tx mark{background:linear-gradient(transparent 55%, rgba(200,170,0,.35) 55%);color:#111}
+.tx .interim{color:rgba(0,0,0,.4)}
+.qframe{position:relative;background:#fff;margin:34px 4px 0;padding:14px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 14px rgba(0,0,0,.06)}
+.qframe input{flex:1;background:#ececeb;border:none;outline:none;padding:16px 14px;font-family:var(--hand);font-size:23px;min-width:0}
+.qside{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;color:var(--muted)}
+.qside button{font-size:16px;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.wave{display:flex;justify-content:center;align-items:center;gap:4px;height:46px;margin:22px 0 10px}
+.wave i{width:2px;background:#bbb;border-radius:1px;height:8px;transition:height .15s}
+.wave.live i{animation:wv .9s ease-in-out infinite}
+@keyframes wv{0%,100%{height:6px}50%{height:var(--h)}}
+.ctrls{display:flex;justify-content:center;align-items:center;gap:40px;margin-top:8px}
+.cb{width:66px;height:66px;border-radius:50%;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.08);display:grid;place-items:center}
+.cb svg{width:22px;height:22px}
+.cb:disabled{opacity:.35;cursor:default}
+.cbig{width:94px;height:94px;border-radius:50%;background:var(--ink);display:grid;place-items:center;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.cbig .sq{width:28px;height:28px;border-radius:5px;background:#e24b3b}
+.cbig .ci{width:34px;height:34px;border-radius:50%;background:#e24b3b}
+.note{text-align:center;font-size:12px;color:var(--muted);margin-top:16px;min-height:16px}
+/* recall */
+.ago{display:flex;align-items:flex-end;justify-content:space-between;margin:10px 0 24px}
+.ago b{font-size:40px;font-weight:800;letter-spacing:-1px}
+.ago span{font-size:12px;color:var(--muted);font-family:ui-monospace,monospace;padding-bottom:8px}
+.frame{position:relative;background:#fff;padding:14px;box-shadow:0 8px 20px rgba(0,0,0,.07)}
+.frame .inner{background:#ececeb;padding:22px 18px}
+.frame .fq{font-family:var(--hand);font-size:27px;line-height:1.35;margin-bottom:16px;color:#2c2c2c}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:6px;position:relative;z-index:1}
+.frame .then{font-family:var(--hand);font-size:21px;line-height:1.4;color:#8d8d8f}
+.play{margin-top:14px;display:inline-flex;gap:8px;align-items:center;background:#fff;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600}
+.play svg{width:14px;height:14px}
+.nowsticky{margin-top:40px;padding:40px 20px 20px}
+.nowsticky textarea{width:100%;min-height:150px;background:transparent;border:none;outline:none;resize:none;font-family:var(--hand);font-size:25px;line-height:1.45;position:relative;z-index:1}
+.nowsticky textarea::placeholder{color:rgba(0,0,0,.3)}
+.bottombar{display:flex;align-items:center;justify-content:space-between;margin-top:30px}
+.tog{display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer}
+.tog .sw{width:52px;height:30px;border-radius:15px;background:#cfcfcd;position:relative;transition:background .2s}
+.tog .sw::after{content:"";position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
+.tog.on .sw{background:var(--ink)}
+.tog.on .sw::after{left:26px}
+.pillbtn{background:#fff;border-radius:14px;padding:13px 20px;font-size:16px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.08);display:flex;gap:6px;align-items:center}
+/* board */
+.post{position:relative;background:#fff;padding:22px 12px 12px;box-shadow:0 6px 14px rgba(0,0,0,.06);text-align:left;width:100%;display:flex;flex-direction:column;gap:10px}
+.post .pq{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post .pa{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;font-family:var(--hand);font-size:21px;line-height:1.3;word-break:keep-all;color:#2e2e2e}
+.grid.list .post .pa{aspect-ratio:auto;min-height:110px}
+.post .pf{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.post .au{text-decoration:underline;text-underline-offset:3px;color:var(--ink2)}
+.post .cm{display:flex;gap:4px;align-items:center;color:var(--muted)}
+.post .cm svg{width:14px;height:14px}
+.search{width:100%;background:var(--chip);border:none;outline:none;border-radius:10px;padding:11px 14px;font-size:14px;margin-bottom:14px}
+/* detail */
+.who{display:flex;align-items:center;gap:12px;flex:1}
+.av{width:44px;height:44px;border-radius:50%;background:#e2e2e0;display:grid;place-items:center;font-size:15px;font-weight:600;color:var(--ink2)}
+.who b{display:block;font-size:17px;font-weight:600}
+.dsticky{margin:30px 4px 0;padding:44px 22px 26px}
+.dsticky .dq{font-size:13px;color:rgba(0,0,0,.42);margin-bottom:12px;position:relative;z-index:1}
+.dsticky .da{font-family:var(--hand);font-size:27px;line-height:1.45;position:relative;z-index:1;word-break:keep-all}
+.thead{display:flex;justify-content:space-between;align-items:center;margin:26px 0 14px;font-size:17px;color:var(--ink2)}
+.thead .cnt{font-size:11px;padding:2px 7px}
+.bq{background:#e6e6e4;color:var(--muted);font-size:14px;line-height:1.5;padding:12px 16px;border-radius:12px;max-width:82%;margin-bottom:12px}
+.ba{background:#fff;font-family:var(--hand);font-size:21px;line-height:1.4;padding:14px 18px;max-width:86%;margin:0 0 16px auto;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.pend{font-size:11px;color:var(--muted);margin:-6px 0 14px 4px}
+.composer{position:sticky;bottom:16px;display:flex;gap:10px;align-items:center;margin-top:20px}
+.composer .in{flex:1;display:flex;gap:8px;align-items:center;background:#fff;border-radius:14px;padding:0 14px;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.composer .in svg{width:16px;height:16px;color:var(--muted);flex:none}
+.composer input{flex:1;border:none;outline:none;padding:16px 0;font-size:15px;background:transparent;min-width:0}
+.send{width:58px;height:58px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;flex:none}
+.send svg{width:22px;height:22px}
+/* inbox */
+.banner{display:block;width:100%;text-align:left;background:var(--y);padding:16px 18px;font-family:var(--hand);font-size:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:16px}
+.rc{background:#fff;padding:16px 18px;margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.rc .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px;align-items:center}
+.rc .meta .t{font-family:ui-monospace,monospace}
+.rc .txt{font-size:16px;line-height:1.55;color:var(--ink2)}
+.rc.ign{opacity:.45}
+.tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;background:#e6e6e4;color:var(--muted)}
+.tag.dark{background:var(--ink);color:#fff}
+.acts{display:flex;gap:10px;margin-top:14px}
+.acts button{flex:1;padding:11px;border-radius:8px;font-size:15px;display:flex;gap:6px;justify-content:center;align-items:center}
+.acts .re{background:#dde8f6;color:#3d5f8f}
+.acts .no{background:#f6dcdc;color:#b34848}
+.acts svg{width:14px;height:14px}
+.rbox{position:relative;margin-top:14px;padding:14px 70px 14px 16px;background:var(--y)}
+.rbox textarea{width:100%;min-height:62px;background:transparent;border:none;outline:none;resize:none;font-family:var(--hand);font-size:22px;line-height:1.35}
+.rbox .send{position:absolute;right:12px;bottom:12px;width:44px;height:44px}
+.myreply{font-family:var(--hand);font-size:19px;color:#888;margin-top:8px;padding-left:10px;border-left:3px solid var(--y)}
+.mk{margin-top:10px;font-size:12px;color:var(--ink2);text-decoration:underline;text-underline-offset:3px}
+/* home compose */
+.compose-wrap{position:relative;margin:30px 8px 34px 4px}
+.compose-wrap .back{position:absolute;inset:14px -14px -10px 14px;transform:rotate(3deg)}
+.compose-wrap .back2{position:absolute;inset:6px -6px -4px 6px;transform:rotate(1.2deg)}
+.compose{position:relative;padding:62px 24px 24px;cursor:pointer;min-height:330px;display:flex;flex-direction:column}
+.compose .ct{font-family:var(--hand);font-size:46px;line-height:1.1;color:#2b2b2b;position:relative;z-index:1}
+.compose .cs{font-size:13px;line-height:1.55;color:rgba(0,0,0,.5);margin:14px 0 22px;flex:1}
+.cbtns{display:flex;gap:10px}
+.cbtns button{display:flex;gap:7px;align-items:center;justify-content:center;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:600}
+.cbtns svg{width:18px;height:18px}
+.cmain{flex:1;background:var(--ink);color:#fff !important;box-shadow:0 6px 16px rgba(0,0,0,.18)}
+.csub{background:rgba(255,255,255,.75)}
+.arr{display:block;width:100%;text-align:left;background:#fff;border-left:6px solid var(--y);padding:14px 16px;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,.05)}
+.arr .when{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.arr .aq{display:block;font-family:var(--hand);font-size:24px;line-height:1.25;margin-bottom:6px}
+.arr .go{font-size:13px;font-weight:600}
+.nextl{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2);margin:14px 4px 0}
+.nextl svg{width:14px;height:14px}
+.tocards{display:flex;width:100%;justify-content:space-between;align-items:center;margin-top:30px;padding:16px 18px;background:#fff;border-radius:14px;text-align:left;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.tocards span{font-size:12px;color:var(--muted)}
+.tocards b{display:block;font-size:15px;color:var(--ink);margin-top:2px}
+/* training */
+.muscle{background:#fff;border-radius:16px;padding:16px 18px;margin-bottom:26px;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.mh{font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:12px}
+.mstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.mstats b{display:block;font-size:26px;font-weight:800}
+.mstats span{font-size:11px;color:var(--muted)}
+.dots{display:flex;justify-content:space-between}
+.dots span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.dots i{width:22px;height:22px;border-radius:7px;background:var(--chip)}
+.dots .on i{background:var(--y);box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.08)}
+.dots .on{color:var(--ink)}
+.sl{font-size:13px;font-weight:600;margin:6px 0 8px;display:flex;justify-content:space-between;align-items:center}
+.sg{font-size:12px;color:var(--ink2);text-decoration:underline;text-underline-offset:3px;font-weight:500}
+.sin{width:100%;background:#fff;border:none;outline:none;border-radius:12px;padding:14px;font-size:15px;margin-bottom:14px}
+.go-train{width:100%;background:var(--ink);color:#fff !important;border-radius:14px;padding:16px;font-size:16px;font-weight:700;margin-top:6px}
+.tbar{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:12px;padding:10px 14px;font-size:13px;color:var(--ink2);margin-top:-6px}
+.tbar span:first-child{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.tbar.done{background:var(--y)}
+.tsteps{background:#fff;margin:26px 4px 0;padding:14px 16px;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.tsteps label{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.5;margin:6px 0}
+.gintro{font-size:14px;line-height:1.6;color:var(--ink2);margin-bottom:20px}
+.gitem{display:block;width:100%;text-align:left;background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.gitem b{font-size:16px;margin-right:8px}
+.gitem p{font-size:13px;color:var(--ink2);margin-top:6px;line-height:1.5}
+.gempty{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:40px 0;color:var(--muted);font-size:13px}
+.gempty svg{width:32px;height:32px}
+.gempty b{color:var(--ink2);font-size:15px}
+.gsum{font-size:15px;line-height:1.6;margin-bottom:14px}
+.gsteps{padding-left:20px;font-size:14px;line-height:1.7;margin-bottom:14px}
+.gtip{background:var(--y);padding:12px 14px;font-size:13px;line-height:1.5}
+.gsheet{max-height:80vh;overflow-y:auto}
+/* tutorial popup */
+.dim.center{align-items:center;padding:20px}
+.tut{width:100%;max-width:380px;padding:48px 24px 22px;animation:up .25s;max-height:88vh;overflow-y:auto}
+.tdots{display:flex;gap:6px;justify-content:center;margin-bottom:16px;position:relative;z-index:1}
+.tdots i{width:7px;height:7px;border-radius:50%;background:rgba(0,0,0,.18)}
+.tdots i.on{background:var(--ink);width:18px;border-radius:4px}
+.tl{font-size:12px;color:rgba(0,0,0,.45);margin-bottom:10px;position:relative;z-index:1}
+.tt{font-family:var(--hand);font-size:34px;font-weight:400;line-height:1.15;margin-bottom:12px}
+.tb{font-size:15px;line-height:1.65;white-space:pre-wrap;color:#333;min-height:90px}
+.tnav{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+.tnav div{display:flex;gap:8px}
+.tskip{font-size:13px;color:rgba(0,0,0,.45)}
+.tprev{padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.7);font-weight:600}
+.tnext{padding:12px 20px;border-radius:12px;background:var(--ink);color:#fff !important;font-weight:700}
+.tut .gempty{padding:26px 0}
+.tbar{cursor:pointer}
+/* coach chat */
+.prog{display:flex;gap:4px;margin:12px 0 0}
+.prog i{flex:1;height:7px;border-radius:4px;background:var(--chip)}
+.prog i.ok{background:var(--c)}
+.prog i.cur{background:var(--c);opacity:.45;animation:blink 1.2s infinite}
+.qmini{margin:26px 4px 6px;padding:30px 16px 14px;font-family:var(--hand);font-size:24px;line-height:1.25}
+.qmini span{display:block;font-family:var(--ui);font-size:11px;color:rgba(0,0,0,.45);margin-bottom:4px;position:relative;z-index:1}
+#chat{display:flex;flex-direction:column;gap:12px;padding:14px 0 150px}
+.msg{max-width:86%;padding:12px 15px;font-size:15px;line-height:1.55;animation:up .2s}
+.msg.ai{background:#fff;border-radius:4px 16px 16px 16px;box-shadow:0 3px 10px rgba(0,0,0,.05);border-left:4px solid var(--hc)}
+.msg .who{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.msg.me{align-self:flex-end;background:var(--y);font-family:var(--hand);font-size:23px;line-height:1.3;border-radius:16px 4px 16px 16px;white-space:pre-wrap}
+.msg.typing{display:flex;gap:5px;width:64px;border-left-color:#ddd}
+.msg.typing i{width:7px;height:7px;border-radius:50%;background:#bbb;animation:blink 1s infinite}
+.msg.typing i:nth-child(2){animation-delay:.2s}.msg.typing i:nth-child(3){animation-delay:.4s}
+.sumcard{background:#fff;padding:18px;box-shadow:0 6px 16px rgba(0,0,0,.06);animation:up .25s}
+.cv{border-left:4px solid var(--hc,#ddd);padding:4px 0 4px 12px;margin:10px 0}
+.cv b{font-size:13px}
+.cv p{font-family:var(--hand);font-size:21px;line-height:1.3;margin-top:2px}
+.cv.old{--hc:#cfcfcf}
+.cv.old p{color:#8d8d8f}
+.cbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;padding:26px 14px 18px;background:linear-gradient(rgba(243,243,241,0),var(--bg) 35%);z-index:15}
+.cbar .row2{display:flex;gap:8px;align-items:flex-end}
+.cbar textarea{flex:1;background:#fff;border:none;border-radius:18px;padding:13px 15px;font-size:15px;line-height:1.4;resize:none;outline:none;box-shadow:0 3px 12px rgba(0,0,0,.07);max-height:120px}
+.mic{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 3px 12px rgba(0,0,0,.07);flex:none}
+.mic svg{width:20px;height:20px}
+.mic.on{background:#e24b3b;color:#fff;animation:blink 1.2s infinite}
+.cbar .send{width:48px;height:48px}
+.skip{display:block;margin:0 auto 10px;font-size:12px;color:var(--ink2);background:#fff;border-radius:14px;padding:7px 14px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+/* recommended questions */
+.recs{display:flex;flex-direction:column;gap:8px;margin:-4px 0 16px}
+.rec{display:block;width:100%;text-align:left;background:#fff;border-radius:12px;padding:11px 14px;font-size:14px;line-height:1.45;border:1.5px solid transparent}
+.rec span{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+.rec.on{border-color:var(--ink);background:var(--yTop)}
+.more{align-self:flex-start;font-size:12px;color:var(--ink2);padding:4px 2px}
+.crecs{display:flex;flex-direction:column;gap:8px;max-width:86%}
+.crecs .rec{box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.sheet{max-height:92vh;overflow-y:auto}
+.recbtns{display:flex;justify-content:space-between;align-items:center}
+.more.ai{font-weight:600;color:var(--ink)}
+.msg .who em{font-style:normal;color:#8a6d00;background:var(--yTop);border-radius:6px;padding:1px 6px;margin-left:4px}
+.conc{margin-top:14px;background:var(--y);padding:12px 14px;font-family:var(--hand);font-size:23px;line-height:1.3}
+.conc span{display:block;font-family:var(--ui);font-size:11px;color:rgba(0,0,0,.5);margin-bottom:2px}
+.conc.empty{background:#eee;color:var(--muted);font-size:20px}
+.tag.nc{align-self:flex-start;background:#f6dcdc;color:#b34848}
+.redo{width:100%;justify-content:center;margin-top:26px;font-size:14px}
+/* tutorial screen mockups */
+.mockwrap{position:relative;height:var(--h);overflow:hidden;border-radius:16px;background:var(--bg);box-shadow:0 0 0 1px rgba(0,0,0,.08),0 6px 16px rgba(0,0,0,.08);margin:4px 0 14px;z-index:1}
+.mock{position:absolute;left:50%;top:0;width:400px;padding:14px 18px 20px;transform:translateX(-50%) scale(var(--s));transform-origin:top center;pointer-events:none;background:var(--bg)}
+.mock .muscle{margin-bottom:16px}
+.mock .post .pa{aspect-ratio:auto;min-height:120px}
+.nb{position:absolute;z-index:6;width:34px;height:34px;border-radius:50%;background:#e24b3b;color:#fff;font:800 19px/34px var(--ui);text-align:center;font-style:normal;box-shadow:0 0 0 4px #fff,0 4px 10px rgba(0,0,0,.25)}
+.tut{max-width:400px}
+.tut .tb{min-height:0}
+.tut .tnav{position:sticky;bottom:-22px;background:var(--y);padding:12px 0 14px;margin-bottom:-14px;z-index:7}
+.mock .mbtn{display:flex;align-items:center;justify-content:center;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:600}
+/* sheet + toast */
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fd .2s}
+@keyframes fd{from{opacity:0}}
+.sheet{width:100%;max-width:420px;background:var(--bg);border-radius:22px 22px 0 0;padding:24px 20px 30px;animation:up .25s}
+@keyframes up{from{transform:translateY(40px)}}
+.sheet h3{font-size:19px;margin-bottom:6px}
+.sheet p{font-size:13px;color:var(--muted);margin-bottom:18px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{background:#fff;padding:16px;border-radius:14px;text-align:left;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.opt b{display:block;font-size:16px}
+.opt span{font-size:12px;color:var(--muted)}
+.opt.demo{background:var(--y)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 18px;border-radius:14px;font-size:14px;z-index:60;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.2);animation:up .25s;display:flex;gap:12px;align-items:center}
+.toast u{font-weight:700;cursor:pointer;white-space:nowrap}
+.reset{display:block;margin:40px auto 0;font-size:12px;color:var(--muted);text-decoration:underline}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------- icons ---------- */
+const I = {
+  pin:'<svg class="pin" viewBox="0 0 12 26"><circle cx="6" cy="6" r="5.2" fill="#1b1b1b"/><rect x="5" y="9" width="2" height="11" fill="#1b1b1b"/><rect x="1.5" y="18.5" width="9" height="2.4" rx="1.2" fill="#1b1b1b"/></svg>',
+  mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>',
+  grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>',
+  inbox:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 13l2.5-7h11L20 13v5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18z"/><path d="M4 13h4.5l1 2h5l1-2H20"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="5" width="3" height="14" rx="1"/><rect x="14" y="5" width="3" height="14" rx="1"/></svg>',
+  playI:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l4 4L8 20H4v-4z"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  cmt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17c2-6 6-9 12-9M13 4l4 4-4 4"/></svg>',
+  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7M12 16.8h.01"/></svg>',
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M4 7l8 6 8-6"/></svg>'
+};
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const MIN = 6e4, HOUR = 36e5, DAY = 864e5;
+const now = () => Date.now();
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const p2 = n => String(n).padStart(2, '0');
+const fmtDT = t => { const d = new Date(t); return `${p2(d.getMonth()+1)}.${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`; };
+const fmtD = t => { const d = new Date(t); return `${p2(d.getMonth()+1)}.${p2(d.getDate())}`; };
+const fmtT = t => { const d = new Date(t); return `${p2(d.getHours())}:${p2(d.getMinutes())}`; };
+function ago(t){
+  const d = now() - t;
+  if (d < MIN) return '방금 전';
+  if (d < HOUR) return Math.floor(d / MIN) + '분 전';
+  if (d < DAY) return Math.floor(d / HOUR) + '시간 전';
+  return Math.floor(d / DAY) + '일 전';
+}
+function left(t){
+  const d = t - now();
+  if (d <= 0) return '곧 열려요';
+  if (d < HOUR) { const s = Math.ceil(d / 1000); return `${Math.floor(s/60)}:${p2(s%60)} 뒤 열림`; }
+  if (d < DAY) return Math.ceil(d / HOUR) + '시간 뒤 열림';
+  return `D-${Math.ceil(d / DAY)} · ${fmtD(t)} 열림`;
+}
+
+/* ---------- AI(데모): 규칙 기반 분류·질문 감지·추천 ---------- */
+const CAT_WORDS = {
+  '과학': ['몸','물','바다','생명','우주','동물','기억','뇌','시간','세포','과학','지구','별','사막'],
+  '나':   ['나는','내가','나를','자아','성격','외모','사랑','정체성','결정','스스로','생각해','AI','인공지능','판단'],
+  '일상': ['하루','물건','친구','엄마','부모','밥','잠','일상','습관','학교','상장']
+};
+function tagOf(text){
+  let best = '일상', score = 0;
+  for (const [c, ws] of Object.entries(CAT_WORDS)) {
+    const s = ws.filter(w => text.includes(w)).length;
+    if (s > score) { score = s; best = c; }
+  }
+  return best;
+}
+const Q_END = /(\?|？|까|까요|나요|니|을까|일까|ㄹ까|는가|인가)\s*$/;
+function detectQ(units){
+  const parts = units.flatMap(u => u.split(/(?<=[?？.!])\s+|\n+/)).map(s => s.trim()).filter(Boolean);
+  for (let i = parts.length - 1; i >= 0; i--) if (Q_END.test(parts[i])) return parts[i];
+  return '';
+}
+
+/* ---------- 생각 훈련 가이드 (처음 접속하면 뜨는 튜토리얼 팝업) ----------
+   생각하는 법을 훈련하는 가이드. 전통적인 기법을 활용한 내용을 기획자가 직접 작성 — 임의로 채우지 않음.
+   한 항목 = 팝업 한 페이지. 형식: { title:'제목', body:'설명 (줄바꿈은 \n)' }
+   항목이 하나라도 있으면 처음 접속할 때 자동으로 뜨고, 홈 오른쪽 위 ? 버튼으로 언제든 다시 볼 수 있다.
+------------------------------------------ */
+const TUTORIAL = [
+  // ── 사용법 (screen: 실제 화면을 축소해 보여 주고, 빨간 번호가 본문 ①②③과 연결된다) ──
+  { title:'질문할까말까에 오신 걸 환영해요',
+    body:'AI가 답을 대신해 주는 시대, 이 앱의 AI는 답을 주지 않아요.\n질문만 던지고, 생각과 결론은 내가 직접 써요.\n\n하루 한 번 생각 훈련으로 스스로 생각하는 근육을 길러 봐요.' },
+  { title:'홈 화면', screen:'home', h:395, s:.5,
+    body:'① 훈련 시작 — 오늘의 생각 훈련을 시작해요.\n② 생각 근육 — 연속 훈련일, 이번 주 훈련, 생각한 시간\n③ 돌아온 생각 — 정한 날이 된 질문이 여기 도착해요.\n④ ? — 이 가이드를 언제든 다시 봐요.\n⑤ ▦ — 생각 게시판으로 가요.' },
+  { title:'훈련 준비', screen:'setup', h:350, s:.5,
+    body:'① 생각할 질문 — 직접 쓰거나 추천 질문을 골라요. ↻ 다른 질문, ✨ AI가 내 기록에 맞춰 추천\n② 생각 도구 — 소크라테스식 문답, 여섯 가지 모자, 자유롭게\n③ 생각 시간 — 5·10·20분 (1분은 시연용)\n④ 훈련 시작' },
+  { title:'코치와 문답하기', screen:'coach', h:330,
+    body:'① 진행 바 — 지금 몇 번째 단계인지 보여요.\n② 남은 생각 시간 — 누르면 단계 설명이 열려요.\n③ ✨ AI가 만든 질문 — 내 답을 읽고 AI가 만든 질문이에요. 답은 주지 않아요.\n④ 다음 단계로 — 이 단계를 넘겨요.\n⑤ 🎙 — 말로 답해요. 글로 써도 돼요.' },
+  { title:'돌아올 날 정하기', screen:'save', h:330, s:.55,
+    body:'① 문답이 끝나면 내가 쓴 생각만 단계별로 모여요. 결론을 비워 두면 "결론 없음"으로 저장돼요.\n② 돌아올 날을 골라요. 그날까지 질문은 🔒 잠겨요.' },
+  { title:'다시 꺼내기', screen:'recall', h:350, s:.5,
+    body:'정한 날이 되면 📮 알림이 와요.\n① 그때 내가 쓴 생각을 단계별로 다시 봐요.\n② "지금도 같은 생각이야?" — 3~5단계를 다시 문답해요.\n③ 지금의 답을 쓰고, 아래 "게시판에 붙이기"를 켜면 생각 게시판에도 올라가요.' },
+  { title:'생각 게시판', screen:'board', h:300,
+    body:'① 다른 사람들이 붙인 결론을 봐요. 눌러서 작성자에게 질문을 보낼 수 있어요.\n② 주제별로 골라 봐요.\n③ 받은 질문 — 내 글에 온 질문은 골라서 답하거나 무시해요.' },
+  // ── 생각 기법 ──
+  { title:'기법 1. 소크라테스식 문답',
+    body:'정답을 알려 주는 대신 질문을 이어 던져, 스스로 자기 생각을 점검하게 하는 방법이에요. 비판적 사고를 가르치는 수업에서 쓰여요.\n\n1. 첫 답 — 떠오르는 대로 먼저 답해요.\n2. 이유 — 왜 그렇게 생각하는지 설명해요.\n3. 반대되는 경우 — 내 답과 맞지 않는 경우를 직접 찾아요.\n4. 수정 — 그 경우를 보고 답을 고치거나, 그대로 두는 이유를 써요.\n5. 내 결론 — 지금 결론을 한 문장으로 직접 써요.\n\n반례를 못 찾으면 코치가 범위를 좁히는 질문을 최대 2번 해요. 반례를 대신 말해 주지는 않아요.\n\n출처\n· 소크라테스의 문답법 — 플라톤의 대화편(『메논』, 『에우티프론』 등)\n· Richard Paul, Linda Elder, 『The Thinker’s Guide to the Art of Socratic Questioning』, Foundation for Critical Thinking (2006)' },
+  { title:'기법 2. 여섯 가지 모자',
+    body:'한 번에 한 가지 관점만 쓰는 모자를 차례로 바꿔 쓰며, 하나의 질문을 여섯 방향에서 생각하는 방법이에요.\n\n🔵 파랑 — 무엇을 생각할지 정하고, 마지막에 정리해요.\n⚪ 하양 — 사실과 정보만 떠올려요.\n🔴 빨강 — 이유 없이 느낌을 말해요.\n🟡 노랑 — 좋은 점과 가능성을 찾아요.\n⚫ 검정 — 위험과 약점을 따져요.\n🟢 초록 — 새로운 생각과 다른 방법을 내요.\n\n모자마다 1~2분씩, 지금 쓴 모자의 관점으로만 생각해요.\n\n출처\n· Edward de Bono, 『Six Thinking Hats』, Little, Brown and Company (1985)' }
+];
+
+/* ---------- 훈련 기법 (훈련 시작 → 생각 도구에서 고름) ----------
+   훈련할 때 쓸 생각 기법. (내용은 기획자가 직접 작성 — 임의로 채우지 않음)
+   형식 예시:
+   { id:'tech-1', name:'기법 이름', origin:'출처·유래', summary:'한 줄 설명',
+     steps:['1단계에서 할 일', '2단계에서 할 일'], tip:'훈련할 때 참고할 점(선택)' }
+------------------------------------------ */
+const TECHS = [
+  // 팀 문서 "[26.11.08] 질문할까말까 AI 에이전트 동작 방식"의 5단계. [제안] 표시 부분은 회의 전 임시 규칙.
+  { id:'socratic', mode:'socratic', name:'소크라테스식 문답', origin:'소크라테스(플라톤 대화편) · Paul & Elder, The Thinker’s Guide to the Art of Socratic Questioning (2006)',
+    summary:'정답을 알려 주는 대신 질문을 이어 던져, 스스로 자기 생각을 점검하고 결론을 직접 쓰게 해요.',
+    steps:[
+      '1. 첫 답 — 떠오르는 대로 먼저 답해 봐.',
+      '2. 이유 — 왜 그렇게 생각해?',
+      '3. 반대되는 경우 — 네 답과 맞지 않는 경우가 있다면?',
+      '4. 수정 — 그 경우를 보고 바뀔 부분이 있어?',
+      '5. 내 결론 — 지금 네 결론을 한 문장으로 써 봐.'
+    ],
+    colors:['#9fb4e8','#7f9be0','#e2554a','#f2c94c','#2a2a2a'],
+    hints:['주변에서 내 답이 잘 맞지 않았던 사람이나 상황을 떠올려 볼까?',
+           '내 답의 핵심 단어 하나를 골라 봐. 그 단어가 통하지 않는 상황이 있을까?'],
+    tip:'반례를 못 찾으면 코치가 범위를 좁히는 질문(힌트)을 최대 2번 해요. 그래도 못 찾으면 "지금은 못 찾았어요"로 적고 넘어가요. 결론은 꼭 내가 직접 써요.' },
+  // [임시] 사용자 요청으로 넣은 예시 기법. 기획자가 정리한 내용으로 바꿀 예정.
+  { id:'six-hats', name:'여섯 가지 모자', origin:'에드워드 드 보노, 《Six Thinking Hats》(1985)',
+    summary:'한 번에 한 가지 관점만 쓰는 모자를 차례로 바꿔 쓰며, 하나의 질문을 여섯 방향에서 생각해요.',
+    steps:[
+      '🔵 파란 모자 — 무엇을 생각할지 정해요. 이 질문에서 내가 알고 싶은 건 뭘까?',
+      '⚪ 하얀 모자 — 사실과 정보만 떠올려요. 내가 확실히 아는 것과 모르는 것은?',
+      '🔴 빨간 모자 — 이유 없이 느낌대로 말해요. 이 질문을 들으면 어떤 기분이 들지?',
+      '🟡 노란 모자 — 좋은 점과 가능성을 찾아요. 이게 맞다면 무엇이 좋아질까?',
+      '⚫ 검은 모자 — 위험과 약점을 따져요. 어디가 틀렸거나 문제가 될 수 있을까?',
+      '🟢 초록 모자 — 새로운 생각을 내요. 전혀 다른 답이나 방법은 없을까?',
+      '🔵 파란 모자 — 정리해요. 지금 내 생각을 한 줄로 말하면? 다음엔 무엇을 더 생각할까?'
+    ],
+    tip:'모자마다 1~2분씩, 지금 쓴 모자의 관점으로만 생각하세요. 판단(검은 모자)은 마지막 쪽에 두면 새로운 생각이 덜 막혀요.' }
+];
+
+/* ---------- 생각 훈련용 추천 질문 ----------
+   [임시] 사용자 요청으로 넣은 질문. 기획자가 자유롭게 고치거나 추가하면 된다.
+   하나의 정답이 없고, 생각 근육 하나를 집중해서 쓰게 만드는 질문으로 구성.
+   형식: { type:'생각 근육 이름', desc:'이 질문이 기르는 힘', qs:['질문', ...] }
+------------------------------------------ */
+const TRAIN_Q = [
+  { type:'정의하기', desc:'흐릿한 개념을 또렷하게 나누는 힘', qs:[
+    '어른이 됐다는 건 정확히 무엇이 바뀐 걸까?',
+    '“잘 쉬었다”는 건 무엇을 기준으로 말할 수 있을까?',
+    '취향과 습관은 어떻게 다를까?',
+    '나를 “나”라고 부를 수 있는 최소한의 조건은 뭘까?',
+    '좋은 질문이란 어떤 질문일까?' ]},
+  { type:'가정 뒤집기', desc:'당연한 전제를 바꿔 보며 따라가는 힘', qs:[
+    '모든 사람이 거짓말을 못 하게 된다면 무엇이 가장 먼저 달라질까?',
+    '시험이 없어진다면 공부는 어떻게 달라질까?',
+    '기억을 하나 지울 수 있다면, 지우는 게 정말 나을까?',
+    '잠을 안 자도 된다면 하루는 정말 더 좋아질까?',
+    '모두가 같은 돈을 번다면 나는 어떤 일을 고를까?' ]},
+  { type:'관점 바꾸기', desc:'다른 사람의 눈으로 다시 보는 힘', qs:[
+    '10년 뒤의 나는 오늘의 고민을 어떻게 볼까?',
+    '우리 동네에 처음 온 사람의 눈에는 무엇이 낯설게 보일까?',
+    '부모님이 지금 내 나이였을 때 가장 두려워한 건 뭐였을까?',
+    '내가 동의하지 않는 의견을 가진 사람은 왜 그게 옳다고 믿을까?',
+    '내 하루를 지켜본 사람은 내가 무엇을 가장 중요하게 여긴다고 생각할까?' ]},
+  { type:'원인 파고들기', desc:'“왜?”를 여러 번 물어 뿌리까지 가는 힘', qs:[
+    '나는 왜 해야 할 일을 미룰까? 진짜 이유는 뭘까?',
+    '사람들은 왜 줄 서는 가게를 더 맛있다고 느낄까?',
+    '왜 밤이 되면 생각이 더 많아질까?',
+    '나는 왜 어떤 사람 앞에서만 말이 많아질까?',
+    '왜 어떤 노래는 계속 머릿속에 맴돌까?' ]},
+  { type:'비교·구분하기', desc:'비슷해 보이는 것의 차이를 찾는 힘', qs:[
+    '칭찬과 아첨은 어디서 갈릴까?',
+    '포기와 내려놓음은 같은 걸까?',
+    'AI가 쓴 글과 내가 쓴 글의 차이는 정확히 어디에 있을까?',
+    '솔직함과 무례함의 경계는 어디일까?',
+    '혼자 있는 것과 외로운 것은 어떻게 다를까?' ]},
+  { type:'판단하기', desc:'정답 없는 선택에서 내 기준을 세우는 힘', qs:[
+    '친구의 거짓말을 알게 됐다면 말해야 할까?',
+    '편리함을 위해 내 정보를 어디까지 내줄 수 있을까?',
+    '정답을 아는 AI가 있어도 스스로 생각해야 할까?',
+    '모두에게 똑같이 주는 것과 필요한 만큼 주는 것 중 무엇이 더 공정할까?',
+    '좋아하는 일과 잘하는 일 중 하나만 고른다면?' ]},
+  { type:'나를 돌아보기', desc:'내 생각이 어떻게 만들어졌는지 보는 힘', qs:[
+    '오늘 내린 결정 중 진짜 내가 고른 건 몇 개일까?',
+    '내가 확신하는 믿음 하나는 어디서 왔을까?',
+    '최근에 생각이 바뀐 적이 있다면, 무엇이 바꿨을까?',
+    '나는 무엇을 쉽게 판단해 버릴까?',
+    '나는 모르는 걸 모른다고 말할 수 있는 사람일까?' ]}
+];
+/* 추천: 최근에 덜 써 본 생각 근육부터, 아직 안 다룬 질문으로 고른다 */
+function recommendQ(n = 3, off = 0){
+  const recent = S.mine.slice(-4).map(m => m.qtype).filter(Boolean);
+  const used = new Set(S.mine.map(m => m.q));
+  const types = [...TRAIN_Q].sort((a, b) => recent.filter(t => t === a.type).length - recent.filter(t => t === b.type).length);
+  const out = [];
+  for (let k = 0; out.length < n && k < types.length * 6; k++) {
+    const t = types[(k + off) % types.length];
+    const pool = t.qs.filter(q => !used.has(q) && !out.some(o => o.q === q));
+    if (pool.length && !out.some(o => o.type === t.type)) out.push({type: t.type, desc: t.desc, q: pool[(off + k) % pool.length]});
+  }
+  return out;
+}
+const aiQ = {};
+const qTypeOf = q => (TRAIN_Q.find(t => t.qs.includes(q)) || {}).type || aiQ[q] || '';
+
+/* ---------- 데이터 ---------- */
+const KEY = 'thime-mvp-v1';
+function seed(){
+  const t = now();
+  return {
+    me: '새벽세시',
+    cardIdx: 0,
+    cards: [
+      {q:'사람 몸의 70%가 물인 이유는 뭘까?', from:'새벽세시'},
+      {q:'AI 없이 하루를 보낸다면 뭐가 제일 막막할까?', from:'jun_k'},
+      {q:'가장 오래 간직한 물건은?', from:'하루한질문'},
+      {q:'기억은 꺼낼 때마다 새로 만들어지는 걸까?', from:'달무리'},
+      {q:'사람 1명을 이루는 가장 큰 요인은 뭘까?', from:'생각중'},
+      {q:'바다 말고 다른 곳에서 생명이 시작됐다면?', from:'익명'},
+      {q:'내가 마지막으로 혼자 결정한 건 뭐였지?', from:'jun_k'},
+      {q:'시간이 거꾸로 흐르면 무엇이 먼저 사라질까?', from:'달무리'},
+      {q:'친구와 아는 사람의 경계는 어디일까?', from:'하루한질문'},
+      {q:'처음 본 사람을 믿게 되는 순간은?', from:'익명'},
+      {q:'정답이 없는 질문이 좋은 이유는?', from:'생각중'},
+      {q:'잠들기 직전 생각은 왜 더 엉뚱할까?', from:'새벽세시'}
+    ].map(c => ({...c, id: uid(), cat: tagOf(c.q)})),
+    mine: [
+      {id:'m1', q:'AI가 대신 생각해 주면 나는 뭘 생각해야 할까?', then:'계산이랑 정리는 맡기고, 나는 판단만 하면 된다.',
+       createdAt: t - 16*DAY - 3*HOUR, returnAt: t - 2*HOUR, status:'open', cat:'나', thinkSec: 600},
+      {id:'m2', q:'사람 1명을 이루는 가장 큰 요인은 뭘까?', then:'사랑하는 사람의 외모나 성격 중 하나가 정반대로 바뀐다면? 성격이 바뀌어도 모습이 그대로면 다시 사랑할 수 있을 것 같다. 외모가 완전히 바뀌면 성격이 비슷한 다른 사람으로 느낄 것 같다.',
+       createdAt: t - 3*DAY, returnAt: t + 11*DAY, status:'locked', cat:'나', thinkSec: 480},
+      {id:'m3', q:'가장 오래 간직한 물건은?', then:'초등학교 때 받은 상장.', now:'상장보다 그날 엄마 표정이 기억나서 버리지 못하는 것 같다.',
+       createdAt: t - 25*DAY, returnAt: t - 4*DAY, status:'answered', cat:'일상', thinkSec: 300}
+    ],
+    posts: [
+      {id:'p1', author:'새벽세시', mine:true, color:'y', cat:'과학', createdAt: t - 2*DAY,
+       q:'사람 몸의 70%가 물인 이유는 뭘까?',
+       a:'바다에서 생명이 시작돼서, 몸 안에 작은 바다를 들고 다니는 거라고 생각함. 물이 많아야 몸 안의 반응이 바다에서처럼 일어날 수 있으니까.',
+       thread:[{q:'눈물이나 땀이 짠 것도 그거랑 관련 있을까요?', a:'짠맛 얘기 듣고 이 답을 쓴 거예요. 근거는 더 찾는 중!'},
+               {q:'그럼 사막 동물은 몸에 물이 더 적을까요?', a:'이건 다음 질문 카드로 만들어 봤어요'}], pending:[]},
+      {id:'p2', author:'jun_k', color:'b', cat:'나', createdAt: t - 5*HOUR,
+       q:'AI 없이 하루를 보낸다면 뭐가 제일 막막할까?', a:'막힐 때마다 내가 뭘 모르는지는 알게 될 듯',
+       thread:[{q:'그럼 오히려 좋은 거 아닌가요?', a:'맞아요. 모르는 걸 아는 게 시작이니까'}], pending:[]},
+      {id:'p3', author:'하루한질문', color:'p', cat:'일상', createdAt: t - 1*DAY,
+       q:'가장 오래 간직한 물건은?', a:'초등학교 때 상장. 그날 엄마 표정이 기억나서',
+       thread:[{q:'무슨 상이었어요?', a:'글짓기 상이요 ㅎㅎ'},{q:'지금도 글 쓰세요?', a:'이 앱에서 쓰고 있죠'},{q:'상장은 어디 두셨어요?', a:'책상 서랍 맨 아래'}], pending:[]},
+      {id:'p4', author:'생각중', color:'g', cat:'나', createdAt: t - 3*DAY,
+       q:'AI가 대신 생각해 주면 나는 뭘 생각해야 할까?', a:'재료 모으는 것까지 맡기면 판단할 것도 남지 않는다',
+       thread:[], pending:[]},
+      {id:'p5', author:'달무리', color:'o', cat:'과학', createdAt: t - 4*DAY,
+       q:'기억은 꺼낼 때마다 새로 만들어지는 걸까?', a:'사진 보고 떠올린 건지 진짜 기억인지 이제 구분이 안 된다',
+       thread:[{q:'저도 그래요. 어릴 때 기억은 거의 사진 같아요', a:'그럼 사진이 기억을 만드는 걸까요'}], pending:[]},
+      {id:'p6', author:'익명', color:'y', cat:'일상', createdAt: t - 6*DAY,
+       q:'잠들기 직전 생각은 왜 더 엉뚱할까?', a:'하루 동안 참았던 생각들이 줄 서 있다가 한꺼번에 나오는 느낌',
+       thread:[], pending:[]}
+    ],
+    received: [
+      {id:'r1', postId:'p1', text:'바다 말고 다른 곳에서 생명이 시작됐다면 몸이 어떻게 달랐을까요?', at: t - 40*MIN, status:'new'},
+      {id:'r2', postId:'p1', text:'ㅋㅋㅋㅋㅋㅋㅋㅋ', at: t - 55*MIN, status:'new'},
+      {id:'r3', postId:'p1', text:'이게 생각이냐? 검색 한 번이면 나오는 걸', at: t - 3*HOUR, status:'ignored'},
+      {id:'r4', postId:'p1', text:'그럼 사막 동물은 몸에 물이 더 적을까요?', at: t - 20*HOUR, status:'answered', reply:'이건 다음 질문 카드로 만들어 봤어요'}
+    ]
+  };
+}
+let S;
+try { S = JSON.parse(localStorage.getItem(KEY)) || seed(); } catch (e) { S = seed(); }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+save();
+
+/* 음성 파일은 IndexedDB에 저장 (과거의 내 목소리 다시 듣기) */
+const audioDB = {
+  db: null,
+  open(){ return new Promise((res, rej) => { if (this.db) return res(this.db);
+    const r = indexedDB.open('thime-audio', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('a');
+    r.onsuccess = () => { this.db = r.result; res(this.db); };
+    r.onerror = () => rej(r.error); }); },
+  async put(k, v){ const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction('a', 'readwrite'); tx.objectStore('a').put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); },
+  async get(k){ const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction('a').objectStore('a').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+};
+
+/* ---------- 화면 상태 ---------- */
+let U = { view:'home', p:{}, hist:[], mineFilter:'전체', mineList:false, boardCat:'전체', boardList:false,
+          search:'', showSearch:false, inboxFilter:'전체', replyId:null, toBoard:true };
+
+function go(view, p = {}){ cleanupView(); U.hist.push({view:U.view, p:U.p}); U.view = view; U.p = p; render(); window.scrollTo(0, 0); }
+function back(){ cleanupView(); const h = U.hist.pop() || {view:'home', p:{}}; U.view = h.view; U.p = h.p; render(); window.scrollTo(0, 0); }
+function cleanupView(){ if (U.view === 'record') recAbort(); if (U.view === 'coach') coachStop(); }
+
+function render(){
+  const v = { home:vHome, cards:vCards, techs:vTechs, techItem:vTechItem, coach:vCoach, record:vRecord, recall:vRecall, board:vBoard, detail:vDetail, inbox:vInbox }[U.view] || vHome;
+  $('#app').innerHTML = v();
+  if (U.view === 'coach') { if (!C) coachStart(); else paintChat(); }
+  if (U.view === 'record') { recMount(); if (U.p.autostart) recStart(); else if (U.p.write) $('#tx').focus(); }
+}
+
+let toastTimer;
+function toast(msg, action, fn){
+  document.querySelectorAll('.toast').forEach(e => e.remove());
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<span>${msg}</span>${action ? `<u>${action}</u>` : ''}`;
+  if (fn) el.querySelector('u').onclick = () => { el.remove(); fn(); };
+  document.body.appendChild(el);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.remove(), action ? 6000 : 2800);
+}
+
+/* ---------- ① 질문 만들기 (홈) ---------- */
+function orderedCards(){
+  // 추천: 최근 내 기록과 다른 주제의 질문을 먼저 보여 준다 (생각의 폭 넓히기)
+  const recent = new Set(S.mine.slice(-5).map(m => m.cat));
+  return [...S.cards].sort((a, b) => (recent.has(a.cat) ? 1 : 0) - (recent.has(b.cat) ? 1 : 0));
+}
+function vHome(){
+  const F = U.mineFilter;
+  const map = {'잠김':'locked','열림':'open','답함':'answered'};
+  const items = [...S.mine].reverse().filter(m => F === '전체' || m.status === map[F]);
+  const minis = items.map(m => {
+    const st = m.status === 'locked' ? `${I.lock}<span>${left(m.returnAt)}</span>`
+             : m.status === 'open' ? `${I.mail}<span>${ago(m.createdAt)} 생각이 도착했어요</span>`
+             : `${I.check}<span>답함 · ${fmtD(m.createdAt)}</span>`;
+    return `<button class="mini ${m.status}" onclick="openMine('${m.id}')">${I.pin}
+      <div class="mq">${esc(m.q)}</div>${m.noConclusion ? '<span class="tag nc">결론 없음</span>' : ''}<div class="st">${st}</div></button>`;
+  }).join('') || `<div class="empty">아직 남긴 질문이 없어요</div>`;
+  const opened = S.mine.filter(m => m.status === 'open').sort((a, b) => b.returnAt - a.returnAt);
+  const nextLock = S.mine.filter(m => m.status === 'locked').sort((a, b) => a.returnAt - b.returnAt)[0];
+  const arrived = opened.length ? `
+    <div class="row"><span class="sub">📮 돌아온 생각</span><span class="cnt">${opened.length}</span></div>
+    ${opened.map(m => `<button class="arr" onclick="go('recall',{id:'${m.id}'})">
+      <span class="when">${ago(m.createdAt)}의 나에게서</span>
+      <span class="aq">${esc(m.q)}</span>
+      <span class="go">다시 꺼내 보기 →</span></button>`).join('')}`
+    : nextLock ? `<p class="nextl">${I.lock}<span>다음에 돌아올 질문 · ${left(nextLock.returnAt)}</span></p>` : '';
+  return `
+  <header class="top"><h1>질문할까말까</h1>
+    <button class="ib" onclick="openTutorial()" aria-label="생각 훈련 가이드">${I.help}</button>
+    <button class="ib" onclick="go('board')" aria-label="생각 게시판">${I.grid}${newCount() ? `<span class="dot">${newCount()}</span>` : ''}</button>
+  </header>
+  <div class="compose-wrap">
+    <div class="back c-g sticky"></div><div class="back2 c-o sticky"></div>
+    <div class="compose sticky c-y" onclick="startTraining()">${I.pin}
+      <p class="ct">오늘의<br>생각 훈련</p>
+      <p class="cs">질문 하나를 정하고, 정한 시간 동안<br>AI 없이 스스로 깊이 생각해요.</p>
+      <div class="cbtns">
+        <button class="cmain" onclick="event.stopPropagation();startTraining()">훈련 시작</button>
+      </div>
+    </div>
+  </div>
+  ${muscleCard()}
+  ${arrived}
+  <div class="row" style="margin-top:28px"><span class="sub">내 질문</span>
+    <div class="seg"><button class="${U.mineList ? '' : 'on'}" onclick="U.mineList=false;render()">${I.grid}</button><button class="${U.mineList ? 'on' : ''}" onclick="U.mineList=true;render()">${I.list}</button></div></div>
+  <div class="chips">${['전체','잠김','열림','답함'].map(f => `<button class="chip ${F === f ? 'on' : ''}" onclick="U.mineFilter='${f}';render()">${f}</button>`).join('')}</div>
+  <div class="grid ${U.mineList ? 'list' : ''}">${minis}</div>
+  <button class="tocards" onclick="go('cards')"><span>생각할 질문이 없다면?<b>다른 사람들의 질문 카드 보기</b></span>${I.arrow}</button>
+  <button class="reset" onclick="resetDemo()">시연 데이터 초기화</button>`;
+}
+/* 생각 근육: 훈련 기록 통계 */
+function muscleCard(){
+  const dayKey = t => { const d = new Date(t); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); };
+  const days = new Set(S.mine.map(m => dayKey(m.createdAt)));
+  let streak = 0, t = now();
+  if (!days.has(dayKey(t))) t -= DAY;
+  while (days.has(dayKey(t))) { streak++; t -= DAY; }
+  const week = S.mine.filter(m => now() - m.createdAt < 7*DAY).length;
+  const total = Math.round(S.mine.reduce((a, m) => a + (m.thinkSec || 0), 0) / 60);
+  const names = ['일','월','화','수','목','금','토'];
+  const dots = Array.from({length: 7}, (_, k) => {
+    const d = now() - (6 - k) * DAY;
+    return `<span class="${days.has(dayKey(d)) ? 'on' : ''}"><i></i>${names[new Date(d).getDay()]}</span>`;
+  }).join('');
+  return `<div class="muscle">
+    <p class="mh">생각 근육</p>
+    <div class="mstats"><div><b>${streak}</b><span>연속 훈련일</span></div><div><b>${week}</b><span>이번 주 훈련</span></div><div><b>${total}</b><span>생각한 시간(분)</span></div></div>
+    <div class="dots">${dots}</div></div>`;
+}
+
+/* 훈련 준비: 질문 · 생각 도구 · 생각 시간 */
+function startTraining(q = ''){
+  let tech = TECHS.some(t => t.id === 'socratic') ? 'socratic' : '', mins = 10, off = 0, recs = recommendQ(3, 0), aiBusy = false;
+  const dim = document.createElement('div');
+  dim.className = 'dim';
+  const draw = () => {
+    dim.innerHTML = `<div class="sheet"><h3>생각 훈련 준비</h3><p>정한 시간 동안은 검색이나 AI 없이 스스로 생각해요.</p>
+      <p class="sl">무엇을 생각할까요?</p>
+      <input class="sin" id="tq" placeholder="생각할 질문을 직접 쓰거나 아래에서 골라요" value="${esc(q)}">
+      <div class="recs">${recs.map(r => `<button class="rec ${q === r.q ? 'on' : ''}" data-q="${esc(r.q)}"><span>${esc(r.type)} · ${esc(r.desc)}</span>${esc(r.q)}</button>`).join('')}
+        <div class="recbtns"><button class="more" data-more>↻ 다른 질문 추천받기</button><button class="more ai" data-ai>${aiBusy ? '만드는 중…' : '✨ AI가 내 기록에 맞춰 추천'}</button></div></div>
+      <p class="sl">생각 도구 <button class="sg" data-g>기법 자세히 보기</button></p>
+      <div class="chips">${[{id:'', name:'자유롭게'}, ...TECHS].map(g => `<button class="chip ${tech === g.id ? 'on' : ''}" data-t="${esc(g.id)}">${esc(g.name)}</button>`).join('')}</div>
+      ${TECHS.length ? '' : '<p class="muted" style="margin:-8px 0 14px">훈련 기법이 추가되면 여기서 골라 훈련할 수 있어요.</p>'}
+      <p class="sl">생각 시간</p>
+      <div class="chips">${[[1,'1분 (시연)'],[5,'5분'],[10,'10분'],[20,'20분']].map(([m, l]) => `<button class="chip ${mins === m ? 'on' : ''}" data-m="${m}">${l}</button>`).join('')}</div>
+      <button class="go-train" data-go>훈련 시작</button></div>`;
+    dim.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { q = $('#tq').value; tech = b.dataset.t; draw(); });
+    dim.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { q = $('#tq').value; mins = +b.dataset.m; draw(); });
+    dim.querySelector('[data-g]').onclick = () => { dim.remove(); go('techs'); };
+    dim.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { q = b.dataset.q; draw(); });
+    dim.querySelector('[data-more]').onclick = () => { q = $('#tq').value; off += 3; recs = recommendQ(3, off); draw(); };
+    dim.querySelector('[data-ai]').onclick = async () => {
+      if (aiBusy) return;
+      q = $('#tq').value; aiBusy = true; draw();
+      const target = recommendQ(1, off)[0] || TRAIN_Q[0];
+      const res = await askAI({task: 'recommend', type: target.type, desc: target.desc, recent: S.mine.slice(-6).map(m => m.q)});
+      aiBusy = false;
+      if (res && res.question) { recs = [{type: target.type, desc: 'AI 추천 · ' + target.desc, q: res.question, ai: true}, ...recs.filter(r => !r.ai)].slice(0, 3); q = res.question; aiQ[res.question] = target.type; }
+      else toast('AI 추천을 쓸 수 없어요. 서버(run-mvp.bat)로 열었는지 확인해 주세요');
+      if (document.body.contains(dim)) draw();
+    };
+    dim.querySelector('[data-go]').onclick = () => { const v = $('#tq').value.trim(); dim.remove(); go(hasSteps(tech) ? 'coach' : 'record', {train: true, prompt: v, tech, mins, qtype: qTypeOf(v)}); };
+  };
+  dim.onclick = e => { if (e.target === dim) dim.remove(); };
+  draw(); document.body.appendChild(dim);
+}
+
+/* 훈련 기법 목록 */
+function vTechs(){
+  const list = TECHS.map(g => `<button class="gitem" onclick="go('techItem',{id:'${esc(g.id)}'})">
+      <b>${esc(g.name)}</b>${g.origin ? `<span class="muted">${esc(g.origin)}</span>` : ''}<p>${esc(g.summary || '')}</p></button>`).join('');
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button><span class="ttl">훈련 기법</span></header>
+  <p class="gintro">훈련할 때 쓸 생각 기법이에요. 골라서 바로 훈련할 수 있어요.</p>
+  ${list || `<div class="gempty">${I.book}<b>아직 등록된 기법이 없어요</b><span>훈련 기법은 준비 중이에요.</span></div>`}
+  <button class="fab" onclick="startTraining()">훈련 시작</button>`;
+}
+function vTechItem(){
+  const g = TECHS.find(x => x.id === U.p.id) || {};
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button><span class="ttl">${esc(g.name || '')}</span></header>
+  ${guideBody(g)}
+  <button class="pillbtn" style="width:100%;justify-content:center;margin-top:24px" onclick="startTrainingWith('${esc(g.id)}')">이 기법으로 훈련하기</button>`;
+}
+function guideBody(g){
+  return `${g.origin ? `<p class="muted" style="margin-bottom:8px">${esc(g.origin)}</p>` : ''}
+  ${g.summary ? `<p class="gsum">${esc(g.summary)}</p>` : ''}
+  ${(g.steps || []).length ? `<ol class="gsteps">${g.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+  ${g.tip ? `<p class="gtip">${esc(g.tip)}</p>` : ''}`;
+}
+function startTrainingWith(id){ go(hasSteps(id) ? 'coach' : 'record', {train: true, prompt: '', tech: id, mins: 10}); }
+function hasSteps(id){ const t = TECHS.find(x => x.id === id); return !!(t && (t.steps || []).length); }
+/* 훈련 중 가이드 바로 보기 (화면을 떠나지 않음) */
+function techSheet(){
+  const g = TECHS.find(x => x.id === (U.p.tech || ''));
+  const dim = document.createElement('div');
+  dim.className = 'dim';
+  dim.innerHTML = `<div class="sheet gsheet"><h3>${g ? esc(g.name) : '훈련 기법'}</h3>
+    ${g ? guideBody(g) : TECHS.length ? TECHS.map(x => `<div class="gitem"><b>${esc(x.name)}</b><p>${esc(x.summary || '')}</p></div>`).join('')
+        : `<div class="gempty">${I.book}<b>아직 등록된 기법이 없어요</b><span>훈련 기법은 준비 중이에요.</span></div>`}
+    <button class="go-train" style="margin-top:18px">닫고 계속 생각하기</button></div>`;
+  dim.onclick = e => { if (e.target === dim || e.target.classList.contains('go-train')) dim.remove(); };
+  document.body.appendChild(dim);
+}
+
+/* 가이드용 축소 화면 (실제 화면과 같은 스타일로 그린다) */
+const nb = (n, pos = 'right:-10px;top:-10px') => `<i class="nb" style="${pos}">${n}</i>`;
+const MOCKS = {
+  home: () => `
+    <header class="top"><h1>질문할까말까</h1><span class="ib" style="position:relative">${I.help}${nb(4)}</span><span class="ib" style="position:relative">${I.grid}${nb(5)}</span></header>
+    <div class="compose-wrap"><div class="back c-g sticky"></div><div class="back2 c-o sticky"></div>
+      <div class="compose sticky c-y">${I.pin}<p class="ct">오늘의<br>생각 훈련</p><p class="cs">질문 하나를 정하고, 정한 시간 동안<br>AI 없이 스스로 깊이 생각해요.</p>
+        <div class="cbtns"><span class="cmain mbtn" style="position:relative">훈련 시작${nb(1)}</span></div></div></div>
+    <div style="position:relative">${muscleCard()}${nb(2, 'right:-6px;top:-10px')}</div>
+    <div class="row"><span class="sub">📮 돌아온 생각</span><span class="cnt">1</span></div>
+    <div class="arr" style="position:relative"><span class="when">16일 전의 나에게서</span><span class="aq">AI가 대신 생각해 주면 나는 뭘 생각해야 할까?</span>${nb(3)}</div>`,
+  setup: () => `<div class="sheet" style="animation:none;border-radius:22px"><h3>생각 훈련 준비</h3><p>정한 시간 동안은 검색이나 AI 없이 스스로 생각해요.</p>
+      <p class="sl">무엇을 생각할까요?</p>
+      <div style="position:relative"><div class="sin">혼자 있는 것과 외로운 것은 어떻게 다를까?</div>${nb(1, 'right:-8px;top:-12px')}</div>
+      <div class="recs"><div class="rec on"><span>비교·구분하기 · 비슷해 보이는 것의 차이를 찾는 힘</span>혼자 있는 것과 외로운 것은 어떻게 다를까?</div>
+        <div class="rec"><span>관점 바꾸기 · 다른 사람의 눈으로 다시 보는 힘</span>10년 뒤의 나는 오늘의 고민을 어떻게 볼까?</div>
+        <div class="recbtns"><span class="more">↻ 다른 질문 추천받기</span><span class="more ai">✨ AI가 내 기록에 맞춰 추천</span></div></div>
+      <p class="sl">생각 도구</p><div class="chips" style="position:relative"><span class="chip on">소크라테스식 문답</span><span class="chip">여섯 가지 모자</span><span class="chip">자유롭게</span>${nb(2, 'right:-8px;top:-12px')}</div>
+      <p class="sl">생각 시간</p><div class="chips" style="position:relative"><span class="chip">1분 (시연)</span><span class="chip">5분</span><span class="chip on">10분</span><span class="chip">20분</span>${nb(3, 'right:-8px;top:-12px')}</div>
+      <div class="go-train" style="position:relative;text-align:center">훈련 시작${nb(4)}</div></div>`,
+  coach: () => `
+    <header class="top"><span class="ib">${I.back}</span><span class="ttl">소크라테스식 문답 훈련</span><span class="ib">${I.help}</span></header>
+    <div class="tbar" style="position:relative"><span>생각 시간 08:42</span><span>단계 설명 보기</span>${nb(2, 'left:-10px;top:-12px')}</div>
+    <div class="prog" style="position:relative"><i class="ok" style="--c:#9fb4e8"></i><i class="ok" style="--c:#7f9be0"></i><i class="cur" style="--c:#e2554a"></i><i style="--c:#f2c94c"></i><i style="--c:#2a2a2a"></i>${nb(1, 'right:-10px;top:-12px')}</div>
+    <div class="chat" style="display:flex;flex-direction:column;gap:12px;padding:16px 0 6px">
+      <div class="msg ai" style="--hc:#7f9be0;animation:none"><span class="who">생각 코치</span>“성격이 제일 중요해”라고 했는데, 왜 그렇게 생각해?</div>
+      <div class="msg me" style="animation:none">같은 상황에서도 반응이 다 달라서</div>
+      <div class="msg ai" style="--hc:#e2554a;animation:none;position:relative"><span class="who">생각 코치 <em>✨ AI가 만든 질문</em></span>성격이 비슷한데 삶이 많이 달랐던 사람을 떠올려 볼까?${nb(3)}</div>
+    </div>
+    <div class="cbar" style="position:relative;left:auto;transform:none;padding:8px 0 0;background:none">
+      <span class="skip" style="position:relative;display:table">이 단계는 여기까지 · 다음 단계로 →${nb(4)}</span>
+      <div class="row2"><span class="mic" style="position:relative">${I.mic}${nb(5, 'left:-10px;top:-12px')}</span><span style="flex:1;background:#fff;border-radius:18px;padding:13px 15px;color:var(--muted);font-size:15px">스스로 생각한 대로 답해 보세요</span><span class="send">${I.up}</span></div></div>`,
+  save: () => `
+    <div class="sumcard" style="position:relative;animation:none"><p class="lbl">오늘 스스로 한 생각</p>
+      <div class="cv" style="--hc:#9fb4e8"><b>1. 첫 답</b><p>성격이 제일 중요해</p></div>
+      <div class="cv" style="--hc:#e2554a"><b>3. 반대되는 경우</b><p>성격이 비슷한 쌍둥이인데 삶이 전혀 다른 경우</p></div>
+      <div class="conc"><span>내 결론</span>성격이 틀을 만들고 경험이 모양을 바꾼다</div>${nb(1, 'right:-8px;top:-10px')}</div>
+    <div class="sheet" style="animation:none;border-radius:22px;margin-top:18px;position:relative"><h3>언제 다시 꺼내 볼까요?</h3><p>그때까지 이 질문은 잠겨요. 정한 날 편지처럼 돌아와요.</p>
+      <div class="opts"><div class="opt demo"><b>1분 뒤</b><span>시연용</span></div><div class="opt"><b>1주 뒤</b><span>도착</span></div><div class="opt"><b>2주 뒤</b><span>추천</span></div><div class="opt"><b>3주 뒤</b><span>도착</span></div></div>${nb(2, 'right:12px;top:-14px')}</div>`,
+  recall: () => `
+    <header class="top"><span class="ib">${I.back}</span><span class="ttl">다시 꺼내기</span></header>
+    <div class="ago"><b>16일 전</b><span>10.23 23:52 → 11.08</span></div>
+    <div class="frame" style="position:relative">${I.pin}<div class="inner"><p class="fq">사람을 구분 짓는 요소란 무엇일까?</p>
+      <p class="lbl">그때의 생각 · 단계별</p><div class="cv old"><b>5. 내 결론</b><p>성격이 틀을 만들고 경험이 모양을 바꾼다</p></div></div>${nb(1)}</div>
+    <div class="pillbtn redo" style="position:relative">💬 “지금도 같은 생각이야?” 다시 문답하기 (3~5단계)${nb(2)}</div>
+    <div class="sticky nowsticky" style="margin-top:30px">${I.pin}<p class="lbl">지금의 답</p><div style="height:40px"></div>${nb(3)}</div>`,
+  board: () => `
+    <header class="top"><span class="ib">${I.back}</span><h1>생각 게시판</h1><span class="ib">${I.search}</span><span class="ib" style="position:relative">${I.inbox}${nb(3)}</span></header>
+    <div class="row"><span class="sub">모든 생각</span></div>
+    <div class="chips" style="position:relative"><span class="chip on">전체</span><span class="chip">과학</span><span class="chip">나</span><span class="chip">일상</span>${nb(2, 'left:240px;top:-6px')}</div>
+    <div class="grid" style="position:relative">
+      <div class="post">${I.pin}<div class="pq">사람 몸의 70%가 물인 이유는 뭘까?</div><div class="pa c-y">몸 안에 작은 바다를 들고 다니는 거라고 생각함</div><div class="pf"><span class="au">새벽세시</span><span class="cm">${I.cmt}2</span></div>${nb(1)}</div>
+      <div class="post">${I.pin}<div class="pq">AI 없이 하루를 보낸다면?</div><div class="pa c-b">막힐 때마다 내가 뭘 모르는지는 알게 될 듯</div><div class="pf"><span class="au">jun_k</span><span class="cm">${I.cmt}1</span></div></div>
+    </div>`
+};
+
+/* 생각 훈련 가이드 팝업 */
+const TUT_KEY = 'thime-tutorial-seen';
+function openTutorial(){
+  let k = 0;
+  const dim = document.createElement('div');
+  dim.className = 'dim center';
+  const close = () => { try { localStorage.setItem(TUT_KEY, '1'); } catch (e) {} dim.remove(); };
+  const draw = () => {
+    if (!TUTORIAL.length) {
+      dim.innerHTML = `<div class="tut sticky">${I.pin}<p class="tl">생각 훈련 가이드</p>
+        <div class="gempty">${I.book}<b>가이드 내용은 준비 중이에요</b></div>
+        <div class="tnav"><span></span><button class="tnext" data-x>닫기</button></div></div>`;
+    } else {
+      const t = TUTORIAL[k], last = k === TUTORIAL.length - 1;
+      dim.innerHTML = `<div class="tut sticky">${I.pin}
+        <div class="tdots">${TUTORIAL.map((_, j) => `<i class="${j === k ? 'on' : ''}"></i>`).join('')}</div>
+        <p class="tl">생각 훈련 가이드 · ${k + 1}/${TUTORIAL.length}</p>
+        <h3 class="tt">${esc(t.title || '')}</h3>
+        ${t.screen && MOCKS[t.screen] ? `<div class="mockwrap" style="--h:${t.h || 300}px;--s:${t.s || .6}"><div class="mock">${MOCKS[t.screen]()}</div></div>` : ''}
+        <p class="tb">${esc(t.body || '')}</p>
+        <div class="tnav"><button class="tskip" data-x>${last ? '' : '건너뛰기'}</button>
+          <div>${k ? '<button class="tprev" data-p>이전</button>' : ''}<button class="tnext" data-n>${last ? '훈련 시작하기' : '다음'}</button></div></div></div>`;
+    }
+    dim.querySelectorAll('[data-x]').forEach(b => b.onclick = close);
+    const pv = dim.querySelector('[data-p]'); if (pv) pv.onclick = () => { k--; draw(); };
+    const nx = dim.querySelector('[data-n]'); if (nx) nx.onclick = () => { if (k < TUTORIAL.length - 1) { k++; draw(); } else { close(); if (U.view === 'home') startTraining(); } };
+  };
+  dim.onclick = e => { if (e.target === dim) close(); };
+  draw(); document.body.appendChild(dim);
+}
+
+function vCards(){
+  const cards = orderedCards();
+  const n = cards.length, i = ((S.cardIdx % n) + n) % n, c = cards[i];
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button><span class="ttl">질문 카드</span><span class="muted">${i + 1} / ${n}</span></header>
+  <div class="stack" id="stack">
+    <div class="back c-g sticky"></div><div class="back2 c-o sticky"></div>
+    <div class="front sticky c-y" id="front" onclick="nextCard()">${I.pin}
+      <span class="src">${esc(c.from)} 님의 질문 · ${esc(c.cat)}</span>
+      <div class="q">${esc(c.q)}</div>
+      <div class="foot"><button class="use" onclick="event.stopPropagation();startTraining(${esc(JSON.stringify(c.q))})">이 질문으로 훈련하기</button>${I.arrow}</div>
+    </div>
+  </div>
+  <p class="hint">✨ 최근 내 생각과 다른 주제부터 골랐어요 · 카드를 누르면 다음 질문</p>`;
+}
+function nextCard(){
+  const f = $('#front'); if (f) f.classList.add('swap');
+  setTimeout(() => { S.cardIdx++; save(); render(); }, 180);
+}
+function openMine(id){
+  const m = S.mine.find(x => x.id === id);
+  if (m.status === 'locked') return toast(`아직 잠겨 있어요 · ${left(m.returnAt)}`);
+  go('recall', {id});
+}
+function resetDemo(){
+  if (!confirm('시연 데이터를 처음 상태로 되돌릴까요?')) return;
+  S = seed(); save(); U.hist = []; U.view = 'home'; render();
+}
+
+/* ---------- ② 혼잣말 기록 ---------- */
+let R = null;
+function vRecord(){
+  const bars = Array.from({length: 23}, (_, k) => `<i style="--h:${10 + Math.round(Math.abs(Math.sin(k * 1.7)) * 30)}px;animation-delay:${(k % 7) * .09}s"></i>`).join('');
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button>
+    <div class="recbar"><span class="rdot idle" id="rdot"></span><span id="rlbl">기록 준비</span></div><span style="flex:1"></span>
+    <button class="ib" onclick="openTutorial()" aria-label="생각 훈련 가이드">${I.help}</button></header>
+  ${U.p.train ? `<div class="tbar" onclick="if(U.p.tech)techSheet()"><span id="tleft">생각 시간 ${p2(U.p.mins)}:00</span><span>${esc((TECHS.find(g => g.id === U.p.tech) || {}).name || '자유롭게 생각하기')}</span></div>` : ''}
+  <div class="sticky bigsticky">${I.pin}
+    ${U.p.prompt ? `<p class="prompt">Q. ${esc(U.p.prompt)}</p>` : ''}
+    <div class="tx" id="tx" contenteditable="true" data-ph="빨간 버튼을 누르고 혼잣말하듯 말해 보세요. 여기에 직접 써도 돼요."></div>
+  </div>
+  ${(() => { const g = TECHS.find(x => x.id === U.p.tech); return g && (g.steps || []).length ? `<div class="tsteps"><p class="sl">${esc(g.name)} 단계</p>${g.steps.map(x => `<label><input type="checkbox"> ${esc(x)}</label>`).join('')}</div>` : ''; })()}
+  <div class="qframe">${I.pin}
+    <input id="qtext" placeholder="말하다 보면 질문이 여기에 잡혀요" value="${esc(U.p.prompt || '')}">
+    <div class="qside"><span>질문</span><button onclick="recSave()">저장</button></div>
+  </div>
+  <div class="wave" id="wave">${bars}</div>
+  <div class="ctrls">
+    <button class="cb" id="bPause" onclick="recPause()" disabled aria-label="일시정지">${I.pause}</button>
+    <button class="cbig" id="bRec" onclick="recToggle()" aria-label="녹음"><span class="ci"></span></button>
+    <button class="cb" onclick="recSave()" aria-label="저장">${I.check}</button>
+  </div>
+  <p class="note" id="note"></p>`;
+}
+function recMount(){
+  R = {on:false, paused:false, sec:0, timer:null, sr:null, mr:null, stream:null, chunks:[], blob:null, segs:[], qTouched:!!U.p.prompt, stopP:null, t0: now(), tt:null};
+  if (U.p.train) {
+    const end = now() + U.p.mins * MIN; let done = false;
+    R.tt = setInterval(() => {
+      const el = $('#tleft'); if (!el) return;
+      const d = Math.max(0, Math.ceil((end - now()) / 1000));
+      el.textContent = d ? `생각 시간 ${p2(Math.floor(d / 60))}:${p2(d % 60)}` : '생각 시간 완료 ✓';
+      if (!d && !done) { done = true; el.parentElement.classList.add('done'); toast('정한 생각 시간을 채웠어요. 더 이어 가도 좋아요'); }
+    }, 1000);
+  }
+  $('#qtext').addEventListener('input', () => { R.qTouched = true; });
+  $('#tx').addEventListener('input', () => { if (!R.on) { R.segs = [$('#tx').innerText]; autoQ(); } });
+}
+const note = m => { const e = $('#note'); if (e) e.textContent = m; };
+function recUI(){
+  const live = R.on && !R.paused;
+  $('#rdot').className = 'rdot ' + (R.on ? (live ? 'live' : '') : 'idle');
+  $('#rlbl').textContent = R.on ? `${R.paused ? '일시정지' : '기록 중'} ${p2(Math.floor(R.sec/60))}:${p2(R.sec%60)}` : (R.segs.length ? '기록 멈춤' : '기록 준비');
+  $('#wave').className = 'wave' + (live ? ' live' : '');
+  $('#bRec').innerHTML = R.on ? '<span class="sq"></span>' : '<span class="ci"></span>';
+  $('#bPause').disabled = !R.on;
+  $('#bPause').innerHTML = R.paused ? I.playI : I.pause;
+}
+function paint(interim = ''){
+  const tx = $('#tx'); if (!tx) return;
+  const full = R.segs.join(' ');
+  const q = autoQ(interim);
+  let html = esc(full);
+  if (q) { const e = esc(q), k = html.lastIndexOf(e); if (k >= 0) html = html.slice(0, k) + `<mark>${e}</mark>` + html.slice(k + e.length); }
+  tx.innerHTML = html + (interim ? ` <span class="interim">${esc(interim)}</span>` : '');
+}
+function autoQ(interim = ''){
+  const q = detectQ(interim ? [...R.segs, interim] : R.segs);
+  if (!R.qTouched && q) $('#qtext').value = q;
+  return detectQ(R.segs);
+}
+async function recStart(){
+  const typed = $('#tx').innerText.trim();
+  R.segs = typed ? [typed] : [];
+  try {
+    R.stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    R.mr = new MediaRecorder(R.stream); R.chunks = [];
+    R.mr.ondataavailable = e => { if (e.data.size) R.chunks.push(e.data); };
+    R.stopP = new Promise(res => { R.mr.onstop = () => { R.blob = new Blob(R.chunks, {type: R.mr.mimeType || 'audio/webm'}); R.stream.getTracks().forEach(t => t.stop()); res(); }; });
+    R.mr.start(500);
+  } catch (e) { note('마이크를 쓸 수 없어요. 스티커에 직접 써도 돼요.'); }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR) {
+    const sr = new SR(); sr.lang = 'ko-KR'; sr.continuous = true; sr.interimResults = true;
+    sr.onresult = e => {
+      let interim = '';
+      for (let k = e.resultIndex; k < e.results.length; k++) {
+        const r = e.results[k];
+        if (r.isFinal) { const t = r[0].transcript.trim(); if (t) R.segs.push(t); } else interim += r[0].transcript;
+      }
+      paint(interim.trim());
+    };
+    sr.onend = () => { if (R && R.on && !R.paused) { try { sr.start(); } catch (e) {} } };
+    sr.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') note('음성 인식 권한이 없어요. 크롬 주소창의 마이크 권한을 허용하거나 직접 써 주세요.'); };
+    try { sr.start(); } catch (e) {}
+    R.sr = sr;
+  } else note('이 브라우저는 음성 인식을 지원하지 않아요. 크롬으로 열거나 직접 써 주세요.');
+  R.on = true; R.paused = false; R.sec = 0;
+  R.timer = setInterval(() => { if (!R.paused) { R.sec++; recUI(); } }, 1000);
+  $('#tx').setAttribute('contenteditable', 'false');
+  recUI();
+}
+async function recStop(){
+  if (!R || !R.on) return;
+  R.on = false; clearInterval(R.timer);
+  try { R.sr && R.sr.stop(); } catch (e) {}
+  try { if (R.mr && R.mr.state !== 'inactive') R.mr.stop(); } catch (e) {}
+  if (R.stopP) await R.stopP;
+  paint(); $('#tx').setAttribute('contenteditable', 'true'); recUI();
+}
+function recAbort(){ if (R) clearInterval(R.tt); if (R && R.on) { R.on = false; clearInterval(R.timer); try { R.sr && R.sr.abort(); } catch (e) {} try { R.mr && R.mr.state !== 'inactive' && R.mr.stop(); } catch (e) {} } R = null; }
+function recToggle(){ R.on ? recStop() : recStart(); }
+function recPause(){
+  if (!R.on) return;
+  R.paused = !R.paused;
+  if (R.paused) { try { R.sr && R.sr.stop(); } catch (e) {} try { R.mr && R.mr.pause(); } catch (e) {} }
+  else { try { R.sr && R.sr.start(); } catch (e) {} try { R.mr && R.mr.resume(); } catch (e) {} }
+  recUI();
+}
+async function recSave(){
+  await recStop();
+  const text = $('#tx').innerText.trim();
+  const q = $('#qtext').value.trim();
+  if (!text && !q) return toast('생각을 먼저 남겨 주세요');
+  pickReturn(async (o, id) => {
+    const item = {id, q: q || text.slice(0, 40), then: text || q, createdAt: now(), returnAt: now() + o[2], status:'locked', cat: tagOf(q + ' ' + text), thinkSec: Math.round((now() - (R ? R.t0 : now())) / 1000), tech: U.p.tech || '', qtype: qTypeOf(q)};
+    if (R) clearInterval(R.tt);
+    if (R && R.blob && R.blob.size) { try { await audioDB.put(id, R.blob); item.audio = true; } catch (e) {} }
+    S.mine.push(item); save();
+    R = null; goHomeSaved(o);
+  });
+}
+/* 돌아올 날 고르기 시트 */
+function pickReturn(onPick){
+  const opts = [['1분 뒤','시연용', MIN, 'demo'], ['1주 뒤','', 7*DAY], ['2주 뒤','추천', 14*DAY], ['3주 뒤','', 21*DAY]];
+  const dim = document.createElement('div');
+  dim.className = 'dim';
+  dim.innerHTML = `<div class="sheet"><h3>언제 다시 꺼내 볼까요?</h3><p>그때까지 이 질문은 잠겨요. 정한 날 편지처럼 돌아와요.</p>
+    <div class="opts">${opts.map((o, k) => `<button class="opt ${o[3] || ''}" data-k="${k}"><b>${o[0]}</b><span>${o[1] || fmtD(now() + o[2]) + ' 도착'}</span></button>`).join('')}</div></div>`;
+  dim.onclick = e => { if (e.target === dim) dim.remove(); };
+  dim.querySelectorAll('.opt').forEach(b => b.onclick = async () => { dim.remove(); await onPick(opts[+b.dataset.k], uid()); });
+  document.body.appendChild(dim);
+}
+function goHomeSaved(o){
+  U.hist = []; U.view = 'home'; U.p = {}; U.mineFilter = '전체'; render(); window.scrollTo(0, 0);
+  toast(`🔒 ${o[0]}에 다시 꺼내 드릴게요`);
+}
+
+/* ---------- 대화형 훈련: 생각 코치는 묻기만 하고, 답이나 의견은 주지 않는다 ---------- */
+// [임시] 짧게 답했을 때 한 번 더 파고드는 질문. 기획자가 정리한 내용으로 바꿀 예정. (실제 AI 연결 시 이 부분을 AI가 만든다)
+const PROBES = ['왜 그렇게 생각하나요?', '예를 하나 들어 볼 수 있을까요?', '조금 더 구체적으로 말해 볼래요?', '그렇게 생각하는 근거는 뭔가요?', '반대로 생각하면 어떻게 될까요?'];
+const HAT = {'🔵':'#4a7bd0', '⚪':'#cfcfcf', '🔴':'#e2554a', '🟡':'#f2c94c', '⚫':'#2a2a2a', '🟢':'#5bb46a'};
+const hatColor = st => { for (const [k, v] of Object.entries(HAT)) if (st.startsWith(k)) return v; return '#bdbdbd'; };
+const stepColor = (t, k) => (t.colors && t.colors[k]) || hatColor(t.steps[k] || '');
+const isSoc = () => C && C.t.mode === 'socratic';
+const NOT_FOUND = /(모르겠|몰라|모름|없는 ?것 ?같|없어|없다|글쎄|못 ?찾|안 ?떠오|생각이 안|딱히)/;
+const quote = (x, n = 40) => { x = x.trim().replace(/\s+/g, ' '); return x.length > n ? x.slice(0, n - 1) + '…' : x; };
+function splitStep(st){ const k = st.indexOf(' — '); return k < 0 ? {label: '', ask: st} : {label: st.slice(0, k), ask: st.slice(k + 3)}; }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+/* ChatGPT 연결: 로컬 서버(server.py)의 /api/ai 를 거친다. 키는 서버에만 있다.
+   서버 없이 열었거나 실패하면 null → 앱은 규칙 기반으로 대신 동작한다. */
+async function askAI(payload){
+  if (location.protocol === 'file:') return null;
+  try {
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 20000);
+    const r = await fetch('/api/ai', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload), signal: ctl.signal});
+    clearTimeout(tm);
+    return r.ok ? await r.json() : null;
+  } catch (e) { return null; }
+}
+let C = null;
+
+function vCoach(){
+  const t = TECHS.find(x => x.id === U.p.tech) || {name: '', steps: []};
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button><span class="ttl">${esc(t.name)} 훈련</span>
+    <button class="ib" onclick="openTutorial()" aria-label="생각 훈련 가이드">${I.help}</button></header>
+  <div class="tbar" onclick="techSheet()"><span id="tleft">생각 시간 ${p2(U.p.mins)}:00</span><span>단계 설명 보기</span></div>
+  <div class="prog" id="prog">${t.steps.map((st, k) => `<i style="--c:${stepColor(t, k)}"></i>`).join('')}</div>
+  <div id="qmini"></div>
+  <div id="chat"></div>
+  <div class="cbar" id="cbar">
+    <button class="skip" id="skip" onclick="coachSkip()">이 단계는 여기까지 · 다음 단계로 →</button>
+    <div class="row2">
+      <button class="mic" id="cmic" onclick="coachMic()" aria-label="말로 답하기">${I.mic}</button>
+      <textarea id="cin" rows="1" placeholder="스스로 생각한 대로 답해 보세요" onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();coachSend()}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+      <button class="send" onclick="coachSend()" aria-label="보내기">${I.up}</button>
+    </div>
+  </div>`;
+}
+function coachStart(){
+  const t = TECHS.find(x => x.id === U.p.tech);
+  C = {t, q: U.p.prompt || '', step: -1, probed: false, hints: 0, msgs: [], answers: t.steps.map(() => []), t0: now(), tt: null, sr: null, busy: false, done: false, resume: U.p.resume || null};
+  const end = now() + U.p.mins * MIN; let fin = false;
+  C.tt = setInterval(() => {
+    const el = $('#tleft'); if (!el) return;
+    const d = Math.max(0, Math.ceil((end - now()) / 1000));
+    el.textContent = d ? `생각 시간 ${p2(Math.floor(d / 60))}:${p2(d % 60)}` : '생각 시간 완료 ✓';
+    if (!d && !fin) { fin = true; el.parentElement.classList.add('done'); toast('정한 생각 시간을 채웠어요. 더 이어 가도 좋아요'); }
+  }, 1000);
+  paintChat();
+  (async () => {
+    if (C.resume) {
+      const m = S.mine.find(x => x.id === C.resume);
+      const prev = m && !m.noConclusion ? (m.now || m.then) : '';
+      await ai(prev ? `지난번 네 결론은 “${quote(prev, 60)}”였어. 지금도 같은 생각이야? 그 결론과 맞지 않는 경우부터 다시 찾아보자.`
+                    : '지난번엔 결론을 쓰지 못했어. 맞지 않는 경우부터 다시 찾아보고, 이번엔 결론까지 직접 써 보자.');
+      C.step = 1; await nextStep();
+    }
+    else if (C.q) { await coachIntro(); await nextStep(); }
+    else { await ai('먼저, 오늘은 무엇에 대해 생각해 볼까요? 생각하고 싶은 질문을 말해 주세요. 막막하면 아래 추천 질문 중에서 골라도 돼요.'); if (C && !C.q) { C.msgs.push({who: 'recs', items: recommendQ(3, 0)}); paintChat(); } }
+  })();
+}
+async function coachIntro(){
+  if (isSoc()) return ai(`“${C.q}”에 대해 다섯 단계로 질문할게. 나는 답을 주지도, 맞다 틀리다 판정하지도 않아. 답과 결론은 네가 직접 써.`);
+  await ai(`좋아요. “${C.q}”에 대해 ${C.t.name}을 하나씩 바꿔 쓰며 생각해 볼게요. 저는 답을 드리지 않고 질문만 할게요. 생각은 스스로 해 보세요.`);
+}
+function coachStop(){ if (!C) return; clearInterval(C.tt); try { C.sr && C.sr.abort(); } catch (e) {} C = null; }
+async function ai(text, color, byAI){
+  if (!C) return;
+  C.busy = true; C.msgs.push({who: 'typing'}); paintChat();
+  await sleep(650);
+  if (!C) return;
+  C.msgs.pop(); C.msgs.push({who: 'ai', text, color, byAI}); C.busy = false; paintChat();
+}
+async function nextStep(){
+  if (!C) return;
+  C.step++; C.probed = false;
+  if (C.step >= C.t.steps.length) return coachFinish();
+  const st = C.t.steps[C.step], sp = splitStep(st), color = stepColor(C.t, C.step);
+  if (isSoc()) {
+    let ask = sp.ask;
+    const a0 = C.answers[0].join(' ');
+    if (C.step === 1 && a0) ask = `“${quote(a0)}”라고 했는데, 왜 그렇게 생각해?`;   // 사용자의 말을 그대로 인용
+    if (C.step === 3 && C.noCounter) ask = '반대되는 경우는 지금 못 찾았어. 그래도 처음 답에서 바꾸고 싶은 부분이 있어? 없다면 그대로 두는 이유는?';
+    return ai(ask, color);
+  }
+  const lead = sp.label ? (C.step === 0 ? `${sp.label}부터 써 볼게요. ` : `${sp.label}로 바꿔 쓸게요. `) : '';
+  await ai(lead + sp.ask, color);
+}
+async function coachSend(){
+  if (!C || C.busy || C.done) return;
+  const el = $('#cin'), v = el.value.trim(); if (!v) return;
+  el.value = ''; el.style.height = 'auto'; coachMicOff();
+  C.msgs.push({who: 'me', text: v}); paintChat();
+  if (!C.q) { C.q = v; await coachIntro(); return nextStep(); }
+  C.answers[C.step].push(v);
+  if (isSoc()) return socraticAfter(v);
+  const last = C.t.steps.length - 1, color = stepColor(C.t, C.step);
+  if (!C.probed && C.step > 0 && C.step < last) {
+    C.probed = true;
+    // ChatGPT가 이번 답을 읽고 한 걸음 더 파고들 질문을 만든다 (답은 주지 않음)
+    C.busy = true; C.msgs.push({who: 'typing'}); paintChat();
+    const res = await askAI({task: 'probe', question: C.q, technique: C.t.name, step: C.t.steps[C.step],
+      previous: C.t.steps.slice(0, C.step).map((st, k) => [splitStep(st).label, C.answers[k].join(' ')]), answer: C.answers[C.step].join(' ')});
+    if (!C) return;
+    C.msgs.pop(); C.busy = false; paintChat();
+    if (res && res.question) { if (res.deeper) return ai(res.question, color, true); return nextStep(); }
+    // AI를 못 쓰면 규칙 기반: 답이 짧을 때만 한 번 더 묻기
+    if (v.length < 20) return ai(PROBES[(C.step + C.q.length) % PROBES.length], color);
+  }
+  nextStep();
+}
+/* 소크라테스식 문답: 3단계(반대되는 경우)에서 못 찾으면 범위를 좁히는 힌트 질문을 최대 2번. 반례를 대신 말하지 않는다. */
+async function socraticAfter(v){
+  if (C.step === 2 && (NOT_FOUND.test(v) || v.length < 4)) {
+    if (C.hints < 2) {
+      C.hints++;
+      C.busy = true; C.msgs.push({who: 'typing'}); paintChat();
+      const res = await askAI({task: 'hint', level: C.hints, question: C.q, first: C.answers[0].join(' '), reason: C.answers[1].join(' ')});
+      if (!C) return;
+      C.msgs.pop(); C.busy = false; paintChat();
+      return res && res.question ? ai(res.question, stepColor(C.t, 2), true) : ai(C.t.hints[C.hints - 1], stepColor(C.t, 2));
+    }
+    C.answers[2].push('지금은 못 찾았어요'); C.noCounter = true;
+    await ai('괜찮아. 지금은 못 찾았다고 적어 둘게. 다시 꺼낼 때 또 찾아보자.', stepColor(C.t, 2));
+  }
+  nextStep();
+}
+function coachPick(q){ if (!C || C.busy || C.q) return; $('#cin').value = q; coachSend(); }
+function coachSkip(){ if (!C || C.busy || C.done || !C.q || C.step < 0) return; coachMicOff(); nextStep(); }
+async function coachFinish(){
+  C.done = true; paintChat();
+  if (isSoc() && !C.answers[4].join('').trim()) await ai('결론 칸이 비어 있어. "결론 없음"으로 저장해 두고, 다시 꺼낼 때 이어서 쓰자.');
+  else await ai(isSoc() ? '여기까지 네가 직접 쓴 생각이야. 나는 결론에 대해 맞다 틀리다 말하지 않아.' : '잘했어요. 오늘 스스로 한 생각을 단계별로 모아 봤어요. 제가 덧붙인 말은 없어요.');
+  if (!C) return;
+  C.msgs.push({who: 'sum'}); paintChat();
+}
+function coachSave(){
+  if (!C) return;
+  const convo = C.t.steps.map((st, k) => ({label: splitStep(st).label || `${k + 1}단계`, a: C.answers[k]}));
+  const lastA = C.answers[C.answers.length - 1].join(' ');
+  const noConc = isSoc() && !lastA.trim();
+  if (C.resume) {   // 다시 꺼내 문답한 경우: 같은 질문에 지금의 결론으로 저장
+    const m = S.mine.find(x => x.id === C.resume);
+    if (m) { m.convo2 = convo; m.now = lastA; m.noConclusion = noConc; if (!noConc) { m.status = 'answered'; m.answeredAt = now(); } m.thinkSec = (m.thinkSec || 0) + Math.round((now() - C.t0) / 1000); save(); }
+    coachStop(); U.hist = []; U.view = 'home'; U.p = {}; render(); window.scrollTo(0, 0);
+    return toast(noConc ? '저장했어요. 결론은 다음에 이어서 써요' : '지금의 결론을 저장했어요');
+  }
+  const all = C.answers.flat().join(' ');
+  const snap = {q: C.q, then: noConc ? '' : (lastA || C.answers.flat().slice(-1)[0] || ''), noConclusion: noConc, convo, thinkSec: Math.round((now() - C.t0) / 1000), tech: C.t.id, cat: tagOf(C.q + ' ' + all), qtype: qTypeOf(C.q)};
+  pickReturn((o, id) => {
+    S.mine.push({id, ...snap, createdAt: now(), returnAt: now() + o[2], status: 'locked'}); save();
+    coachStop(); goHomeSaved(o);
+  });
+}
+function paintChat(){
+  if (!C) return;
+  const prog = $('#prog');
+  if (prog) [...prog.children].forEach((e, k) => { e.className = k < C.step || C.done ? 'ok' : k === C.step ? 'cur' : ''; });
+  const qm = $('#qmini');
+  if (qm) qm.innerHTML = C.q ? `<div class="qmini sticky">${I.pin}<span>오늘의 질문</span>${esc(C.q)}</div>` : '';
+  $('#chat').innerHTML = C.msgs.map(m => {
+    if (m.who === 'typing') return `<div class="msg ai typing"><i></i><i></i><i></i></div>`;
+    if (m.who === 'ai') return `<div class="msg ai" style="--hc:${m.color || '#d6d6d4'}"><span class="who">생각 코치${m.byAI ? ' <em>✨ AI가 만든 질문</em>' : ''}</span>${esc(m.text)}</div>`;
+    if (m.who === 'me') return `<div class="msg me">${esc(m.text)}</div>`;
+    if (m.who === 'recs') return C.q ? '' : `<div class="crecs">${m.items.map(r => `<button class="rec" onclick="coachPick(this.dataset.q)" data-q="${esc(r.q)}"><span>${esc(r.type)}</span>${esc(r.q)}</button>`).join('')}</div>`;
+    return `<div class="sumcard"><p class="lbl">오늘 스스로 한 생각</p>
+      ${C.t.steps.map((st, k) => `<div class="cv" style="--hc:${stepColor(C.t, k)}"><b>${esc(splitStep(st).label || (k + 1) + '단계')}</b><p>${C.answers[k].length ? C.answers[k].map(esc).join('<br>') : `<span class="muted">${C.resume && k < 2 ? '지난번 기록' : '건너뜀'}</span>`}</p></div>`).join('')}
+      ${isSoc() ? `<div class="conc ${C.answers[4].join('').trim() ? '' : 'empty'}"><span>내 결론</span>${C.answers[4].join('').trim() ? esc(C.answers[4].join(' ')) : '결론 없음 · 다시 꺼낼 때 이어서 써요'}</div>` : ''}
+      <button class="go-train" onclick="coachSave()">${C.resume ? '지금의 결론 저장' : '돌아올 날 정하고 저장'}</button></div>`;
+  }).join('');
+  const bar = $('#cbar'); if (bar) bar.style.display = C.done ? 'none' : '';
+  const sk = $('#skip'); if (sk) sk.style.visibility = C.q && C.step >= 0 && !C.done ? 'visible' : 'hidden';
+  window.scrollTo(0, document.body.scrollHeight);
+}
+/* 말로 답하기 (받아쓰기) */
+function coachMic(){
+  if (!C) return;
+  if (C.sr) return coachMicOff();
+  const SRc = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SRc) return toast('이 브라우저는 음성 인식을 지원하지 않아요. 크롬에서 열어 주세요');
+  const el = $('#cin'), base = el.value ? el.value + ' ' : '';
+  const sr = new SRc(); sr.lang = 'ko-KR'; sr.continuous = true; sr.interimResults = true;
+  let fin = '';
+  sr.onresult = e => {
+    let interim = '';
+    for (let k = e.resultIndex; k < e.results.length; k++) { const r = e.results[k]; if (r.isFinal) fin += r[0].transcript.trim() + ' '; else interim += r[0].transcript; }
+    el.value = base + fin + interim; el.dispatchEvent(new Event('input'));
+  };
+  sr.onerror = e => { if (e.error === 'not-allowed') toast('마이크 권한을 허용해 주세요'); coachMicOff(); };
+  sr.onend = () => { if (C && C.sr === sr) coachMicOff(); };
+  try { sr.start(); C.sr = sr; $('#cmic').classList.add('on'); } catch (e) {}
+}
+function coachMicOff(){ if (!C || !C.sr) return; const sr = C.sr; C.sr = null; try { sr.stop(); } catch (e) {} const b = $('#cmic'); if (b) b.classList.remove('on'); }
+
+/* ---------- ③ 다시 꺼내기 ---------- */
+function vRecall(){
+  const m = S.mine.find(x => x.id === U.p.id);
+  if (m.status === 'open') { m.seen = true; save(); }
+  const d = now() - m.createdAt;
+  const big = d >= DAY ? `${Math.floor(d / DAY)}일 전` : d >= HOUR ? `${Math.floor(d / HOUR)}시간 전` : `${Math.max(1, Math.floor(d / MIN))}분 전`;
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button><span class="ttl">다시 꺼내기</span></header>
+  <div class="ago"><b>${big}</b><span>${fmtDT(m.createdAt)} → ${fmtD(now())}</span></div>
+  <div class="frame">${I.pin}<div class="inner">
+    <p class="fq">${esc(m.q)}</p>
+    ${m.convo ? `<p class="lbl">그때의 생각 · 단계별</p>${m.convo.map(c => `<div class="cv old"><b>${esc(c.label)}</b><p>${c.a.length ? c.a.map(esc).join('<br>') : '—'}</p></div>`).join('')}`
+             : `<p class="lbl">그때의 답</p><p class="then">${esc(m.then)}</p>`}
+    ${m.audio ? `<button class="play" onclick="playPast('${m.id}', this)">${I.playI}그때 내 목소리 듣기</button>` : ''}
+  </div></div>
+  ${m.tech === 'socratic' ? `<button class="pillbtn redo" onclick="go('coach',{train:true, tech:'socratic', prompt:${esc(JSON.stringify(m.q))}, mins:5, resume:'${m.id}'})">💬 ${m.noConclusion ? '결론 이어서 쓰기' : '“지금도 같은 생각이야?” 다시 문답하기'} (3~5단계)</button>` : ''}
+  <div class="sticky nowsticky">${I.pin}<p class="lbl">지금의 답</p>
+    <textarea id="nowA" placeholder="그때와 지금, 생각이 달라졌나요?">${esc(m.now || '')}</textarea></div>
+  <div class="bottombar">
+    <div class="tog ${U.toBoard ? 'on' : ''}" onclick="U.toBoard=!U.toBoard;this.classList.toggle('on')"><span class="sw"></span>게시판에 붙이기</div>
+    <button class="pillbtn" onclick="saveRecall('${m.id}')">${I.check.replace('<svg', '<svg width="18" height="18"')} 저장</button>
+  </div>`;
+}
+async function playPast(id, btn){
+  try {
+    const blob = await audioDB.get(id);
+    if (!blob) return toast('음성 파일을 찾을 수 없어요');
+    const a = new Audio(URL.createObjectURL(blob));
+    btn.innerHTML = `${I.pause}재생 중`; a.onended = () => btn.innerHTML = `${I.playI}그때 내 목소리 듣기`;
+    a.play();
+  } catch (e) { toast('재생할 수 없어요'); }
+}
+function saveRecall(id){
+  const m = S.mine.find(x => x.id === id);
+  const v = $('#nowA').value.trim();
+  if (!v) return toast('지금의 생각을 한 줄이라도 남겨 주세요');
+  m.now = v; m.status = 'answered'; m.answeredAt = now();
+  if (U.toBoard) S.posts.unshift({id: uid(), author: S.me, mine: true, color: ['y','g','b','p','o'][S.posts.length % 5], cat: m.cat, createdAt: now(), q: m.q, a: v, thread: [], pending: []});
+  save();
+  U.hist = []; U.view = U.toBoard ? 'board' : 'home'; U.p = {}; render(); window.scrollTo(0, 0);
+  toast(U.toBoard ? '📌 게시판에 붙였어요' : '저장했어요');
+}
+
+/* ---------- ④ 생각 게시판 ---------- */
+const newCount = () => S.received.filter(r => r.status === 'new').length;
+function vBoard(){
+  const c = U.boardCat, s = U.search.trim();
+  const posts = S.posts.filter(p => (c === '전체' || p.cat === c) && (!s || (p.q + p.a + p.author).includes(s)));
+  const cards = posts.map(p => `
+    <button class="post" onclick="go('detail',{id:'${p.id}'})">${I.pin}
+      <div class="pq">${esc(p.q)}</div>
+      <div class="pa c-${p.color}">${esc(p.a.length > 38 ? p.a.slice(0, 36) + '…' : p.a)}</div>
+      <div class="pf"><span class="au">${esc(p.author)}</span><span class="cm">${I.cmt}${p.thread.length}</span></div>
+    </button>`).join('') || `<div class="empty">찾는 생각이 없어요</div>`;
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button><h1>생각 게시판</h1>
+    <button class="ib" onclick="U.showSearch=!U.showSearch;render()" aria-label="검색">${I.search}</button>
+    <button class="ib" onclick="go('inbox')" aria-label="받은 질문">${I.inbox}${newCount() ? `<span class="dot">${newCount()}</span>` : ''}</button>
+  </header>
+  ${U.showSearch ? `<input class="search" id="srch" placeholder="생각, 질문, 작성자 검색" value="${esc(U.search)}" oninput="U.search=this.value;render();const e=$('#srch');e.focus();e.setSelectionRange(e.value.length,e.value.length)">` : ''}
+  <div class="row"><span class="sub">모든 생각</span>
+    <div class="seg"><button class="${U.boardList ? '' : 'on'}" onclick="U.boardList=false;render()">${I.grid}</button><button class="${U.boardList ? 'on' : ''}" onclick="U.boardList=true;render()">${I.list}</button></div></div>
+  <div class="chips">${['전체','과학','나','일상'].map(f => `<button class="chip ${c === f ? 'on' : ''}" onclick="U.boardCat='${f}';render()">${f}</button>`).join('')}</div>
+  <div class="grid ${U.boardList ? 'list' : ''}">${cards}</div>
+  <button class="fab" onclick="startTraining()">+ 붙이기</button>`;
+}
+
+/* ---------- ⑤ 자세히 보기 ---------- */
+function vDetail(){
+  const p = S.posts.find(x => x.id === U.p.id);
+  const th = p.thread.map(t => `<div class="bq">Q. ${esc(t.q)}</div><div class="ba">${esc(t.a)}</div>`).join('');
+  const pend = (p.pending || []).map(q => `<div class="bq">Q. ${esc(q)}</div><p class="pend">작성자가 골라서 답해요</p>`).join('');
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button>
+    <div class="who"><span class="av">${esc(p.author[0])}</span><div><b>${esc(p.author)}</b><span class="muted">${ago(p.createdAt)} · ${esc(p.cat)}</span></div></div></header>
+  <div class="sticky dsticky c-${p.color}">${I.pin}<p class="dq">${esc(p.q)}</p><p class="da">${esc(p.a)}</p></div>
+  <div class="thead"><span>작성자 답글</span><span class="cnt">${p.thread.length}</span></div>
+  ${th || `<p class="muted" style="margin-bottom:12px">아직 답글이 없어요. 첫 질문을 남겨 보세요.</p>`}${pend}
+  ${p.mine
+    ? `<button class="pillbtn" style="width:100%;justify-content:center;margin-top:16px" onclick="go('inbox')">${I.inbox.replace('<svg', '<svg width="18" height="18"')} 받은 질문 보기 (${S.received.filter(r => r.postId === p.id && r.status === 'new').length})</button>`
+    : `<div class="composer"><div class="in">${I.lock}<input id="ask" placeholder="작성자에게 질문" onkeydown="if(event.key==='Enter')ask('${p.id}')"></div>
+        <button class="send" onclick="ask('${p.id}')">${I.up}</button></div>`}`;
+}
+function ask(id){
+  const v = $('#ask').value.trim(); if (!v) return;
+  const p = S.posts.find(x => x.id === id);
+  (p.pending = p.pending || []).push(v); save(); render();
+  toast('질문을 보냈어요. 작성자가 골라서 답해요');
+}
+
+/* ---------- ⑥ 골라서 답하기 (받은 질문) ---------- */
+function vInbox(){
+  const F = U.inboxFilter, all = S.received;
+  const cnt = {'전체': all.length, '답함': all.filter(r => r.status === 'answered').length, '무시': all.filter(r => r.status === 'ignored').length};
+  const show = all.filter(r => F === '전체' || (F === '답함' ? r.status === 'answered' : r.status === 'ignored'));
+  const postIds = [...new Set(all.map(r => r.postId))];
+  const groups = postIds.map(pid => {
+    const p = S.posts.find(x => x.id === pid);
+    const list = show.filter(r => r.postId === pid).sort((a, b) => b.at - a.at).map(rc).join('');
+    if (!list) return '';
+    return `<button class="banner" onclick="go('detail',{id:'${pid}'})">${esc(p ? p.a : '')}</button>${list}`;
+  }).join('');
+  return `
+  <header class="top"><button class="ib" onclick="back()">${I.back}</button><span class="ttl">받은 질문</span><span class="cnt">${all.length}</span></header>
+  <div class="chips">${Object.keys(cnt).map(f => `<button class="chip ${F === f ? 'on' : ''}" onclick="U.inboxFilter='${f}';render()">${f} ${cnt[f]}</button>`).join('')}</div>
+  ${groups || `<div class="empty">받은 질문이 없어요</div>`}`;
+}
+function rc(r){
+  const head = `<div class="meta"><span>익명</span>${r.status === 'answered' ? '<span class="tag dark">답함</span>' : r.status === 'ignored' ? '<span class="tag">무시함</span>' : `<span class="t">${fmtT(r.at)}</span>`}</div>`;
+  let body = '';
+  if (r.status === 'new' && U.replyId === r.id) {
+    body = `<div class="rbox"><textarea id="rtxt" placeholder="골라서 답하기"></textarea><button class="send" onclick="sendReply('${r.id}')">${I.up}</button></div>`;
+  } else if (r.status === 'new') {
+    body = `<div class="acts"><button class="re" onclick="U.replyId='${r.id}';render();$('#rtxt').focus()">답글 ${I.pen}</button><button class="no" onclick="ignore('${r.id}')">무시 ${I.x}</button></div>`;
+  } else if (r.status === 'answered') {
+    body = `<p class="myreply">${esc(r.reply)}</p>`;
+  }
+  const mk = r.status !== 'ignored' && r.text.length > 6 ? `<button class="mk" onclick="toCard('${r.id}')">↗ 다음 질문 카드로 만들기</button>` : '';
+  return `<div class="rc ${r.status === 'ignored' ? 'ign' : ''}">${head}<p class="txt">${esc(r.text)}</p>${body}${mk}</div>`;
+}
+function sendReply(id){
+  const v = $('#rtxt').value.trim(); if (!v) return;
+  const r = S.received.find(x => x.id === id);
+  r.status = 'answered'; r.reply = v;
+  const p = S.posts.find(x => x.id === r.postId); if (p) p.thread.push({q: r.text, a: v});
+  U.replyId = null; save(); render(); toast('답글을 달았어요. 게시판에 함께 보여요');
+}
+function ignore(id){ S.received.find(x => x.id === id).status = 'ignored'; save(); render(); }
+function toCard(id){
+  const r = S.received.find(x => x.id === id);
+  if (S.cards.some(c => c.q === r.text)) return toast('이미 질문 카드에 있어요');
+  S.cards.push({id: uid(), q: r.text, from: '받은 질문', cat: tagOf(r.text)}); save();
+  toast('질문 카드에 추가했어요', '보러 가기', () => go('cards'));
+}
+
+/* ---------- 정한 시간이 되면 돌려주기 ---------- */
+setInterval(() => {
+  let arrived = null;
+  S.mine.forEach(m => { if (m.status === 'locked' && m.returnAt <= now()) { m.status = 'open'; arrived = m; } });
+  if (arrived) {
+    save();
+    const m = arrived;
+    toast(`📮 ${ago(m.createdAt)}의 생각이 돌아왔어요`, '열어 보기', () => go('recall', {id: m.id}));
+    if (U.view === 'home') render();
+  } else if (U.view === 'home' && S.mine.some(m => m.status === 'locked' && m.returnAt - now() < HOUR)) {
+    render();
+  }
+}, 1000);
+
+/* 카드 스와이프 */
+let sx = null;
+document.addEventListener('touchstart', e => { if (e.target.closest('#stack')) sx = e.touches[0].clientX; }, {passive: true});
+document.addEventListener('touchend', e => {
+  if (sx === null) return;
+  const dx = e.changedTouches[0].clientX - sx; sx = null;
+  if (Math.abs(dx) > 50) { S.cardIdx += dx < 0 ? 1 : -1; save(); render(); }
+});
+
+render();
+try { if (TUTORIAL.length && !localStorage.getItem(TUT_KEY)) openTutorial(); } catch (e) {}
+</script>
+</body>
+</html>

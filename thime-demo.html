@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Thime — 생각하는 시간</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
+<style>
+  :root {
+    --brand: #6B48FF;
+    --brand-light: rgba(107,72,255,0.15);
+    --brand-border: rgba(107,72,255,0.3);
+    --night-50: #E8E8F0;
+    --night-100: #C0C0D8;
+    --night-200: #9090B8;
+    --night-300: #606090;
+    --night-400: #404068;
+    --night-500: #282848;
+    --night-600: #1E1E38;
+    --night-700: #16162A;
+    --night-800: #0F0F1A;
+    --text-primary: #F0F0F8;
+    --text-secondary: #9090B8;
+    --text-muted: #505070;
+    --border: rgba(255,255,255,0.08);
+    --card: rgba(255,255,255,0.04);
+    --card-hover: rgba(255,255,255,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--night-800); color: var(--text-primary); font-family: 'Pretendard Variable', system-ui, sans-serif; }
+  body { display: flex; justify-content: center; }
+
+  /* ── 레이아웃 ── */
+  #app { width: 100%; max-width: 430px; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+  .glow { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 400px; height: 400px; background: radial-gradient(circle, rgba(107,72,255,0.12) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+  main { flex: 1; overflow-y: auto; padding: 24px 16px 88px; position: relative; z-index: 1; }
+
+  /* ── 탭바 ── */
+  nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: rgba(15,15,26,0.92); backdrop-filter: blur(20px); border-top: 1px solid var(--border); z-index: 50; padding-bottom: env(safe-area-inset-bottom); }
+  nav ul { display: flex; list-style: none; }
+  nav li { flex: 1; }
+  nav button { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 0 8px; background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 11px; font-family: inherit; transition: color .2s; }
+  nav button .icon { font-size: 20px; line-height: 1; }
+  nav button.active { color: #8B6FFF; }
+
+  /* ── 페이지 전환 ── */
+  .page { display: none; flex-direction: column; gap: 20px; animation: fadeIn .25s ease; }
+  .page.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── 공통 카드 ── */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; }
+  .card-brand { background: var(--brand-light); border-color: var(--brand-border); }
+  .card:hover { background: var(--card-hover); }
+
+  /* ── 타이포 ── */
+  h1 { font-size: 22px; font-weight: 700; }
+  h2 { font-size: 18px; font-weight: 700; }
+  .label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8B6FFF; margin-bottom: 6px; }
+  .muted { color: var(--text-muted); font-size: 12px; }
+  .secondary { color: var(--text-secondary); font-size: 13px; }
+
+  /* ── 버튼 ── */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; font-weight: 600; border: none; cursor: pointer; transition: all .2s; border-radius: 12px; }
+  .btn-primary { background: var(--brand); color: #fff; padding: 12px 20px; font-size: 14px; box-shadow: 0 4px 20px rgba(107,72,255,.35); }
+  .btn-primary:hover { background: #5535E0; }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-ghost { background: rgba(255,255,255,.06); color: var(--text-secondary); border: 1px solid var(--border); padding: 10px 16px; font-size: 13px; }
+  .btn-ghost:hover { background: rgba(255,255,255,.1); }
+  .btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 10px; }
+  .btn-full { width: 100%; }
+  .btn-danger { background: #c0392b; color: #fff; padding: 10px 16px; font-size: 13px; }
+
+  /* ── 입력 ── */
+  textarea, input[type=text] { width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text-primary); font-family: inherit; font-size: 14px; line-height: 1.6; resize: none; outline: none; transition: border-color .2s; }
+  textarea:focus, input[type=text]:focus { border-color: var(--brand); }
+  textarea::placeholder, input::placeholder { color: var(--text-muted); }
+
+  /* ── 태그 ── */
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(107,72,255,.15); color: #A88FFF; border: 1px solid rgba(107,72,255,.25); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ── 기록 카드 ── */
+  .record-card { cursor: pointer; transition: all .2s; text-align: left; }
+  .record-card:hover { background: var(--card-hover); transform: translateY(-1px); }
+  .record-card.recall { border-color: var(--brand-border); background: var(--brand-light); }
+  .record-title { font-size: 14px; font-weight: 500; line-height: 1.5; color: var(--text-primary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .record-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+
+  /* ── 녹음 버튼 ── */
+  .rec-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 12px 0; }
+  .rec-btn { width: 80px; height: 80px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 30px; transition: all .2s; }
+  .rec-btn-idle { background: var(--brand); box-shadow: 0 6px 24px rgba(107,72,255,.4); }
+  .rec-btn-idle:hover { background: #5535E0; transform: scale(1.05); }
+  .rec-btn-stop { background: #e74c3c; box-shadow: 0 6px 24px rgba(231,76,60,.4); position: relative; }
+  .pulse-ring { position: absolute; inset: -8px; border-radius: 50%; border: 2px solid rgba(231,76,60,.5); animation: pulse 1.5s ease infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); opacity: .8; } 50% { transform: scale(1.15); opacity: .2; } }
+  .rec-timer { font-family: 'SF Mono', monospace; color: #e74c3c; font-size: 14px; font-weight: 600; }
+
+  /* ── 모드 탭 ── */
+  .mode-tabs { display: flex; gap: 6px; background: rgba(0,0,0,.3); padding: 4px; border-radius: 12px; width: fit-content; }
+  .mode-tab { padding: 6px 16px; border-radius: 9px; border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; background: none; color: var(--text-muted); }
+  .mode-tab.active { background: var(--brand); color: #fff; }
+
+  /* ── 피드 ── */
+  .feed-card { display: flex; flex-direction: column; gap: 10px; }
+  .feed-text { font-size: 14px; line-height: 1.6; color: var(--text-primary); }
+  .feed-footer { display: flex; align-items: center; justify-content: space-between; }
+  .comment-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; font-family: inherit; transition: color .2s; padding: 4px 0; }
+  .comment-btn:hover { color: #8B6FFF; }
+  .comment-input-area { border-top: 1px solid var(--border); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; animation: fadeIn .2s ease; }
+  .comment-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* ── 잠금 안내 ── */
+  .lock-hint { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .lock-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── 받은 편지함 ── */
+  .inbox-card { display: flex; flex-direction: column; gap: 12px; }
+  .badge-new { font-size: 10px; font-weight: 700; background: var(--brand); color: #fff; padding: 2px 8px; border-radius: 999px; }
+  .reply-bubble { background: var(--brand-light); border: 1px solid var(--brand-border); border-radius: 12px; padding: 12px; animation: fadeIn .3s ease; }
+  .reply-label { font-size: 10px; font-weight: 700; color: #8B6FFF; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
+  .reply-text { font-size: 13px; line-height: 1.5; color: var(--text-primary); }
+  .reply-input-wrap { display: flex; flex-direction: column; gap: 8px; animation: fadeIn .2s ease; }
+  .reply-hint { font-size: 11px; color: var(--text-muted); }
+
+  /* ── 이어 생각 ── */
+  .followup-item { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .followup-text { font-size: 13px; line-height: 1.5; }
+
+  /* ── 요약 결과 ── */
+  .summary-box { animation: slideUp .35s ease; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── AI 처리 중 ── */
+  .ai-processing { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+  .spinner { width: 14px; height: 14px; border: 2px solid rgba(107,72,255,.3); border-top-color: var(--brand); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── 체크박스 ── */
+  .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+  .checkbox-row input { accent-color: var(--brand); width: 15px; height: 15px; cursor: pointer; }
+
+  /* ── 빈 상태 ── */
+  .empty-state { text-align: center; padding: 60px 0; color: var(--text-muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+  /* ── 상세 뒤로가기 ── */
+  .back-btn { background: none; border: none; color: var(--text-muted); font-size: 13px; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; margin-bottom: 4px; }
+  .back-btn:hover { color: var(--text-secondary); }
+
+  /* ── 언리드 뱃지 ── */
+  .unread-dot { width: 8px; height: 8px; background: var(--brand); border-radius: 50%; display: inline-block; }
+
+  /* ── 섹션 헤더 ── */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+  audio { width: 100%; height: 36px; accent-color: var(--brand); }
+  audio::-webkit-media-controls-panel { background: rgba(22,22,42,.9); }
+
+  hr { border: none; border-top: 1px solid var(--border); }
+  
+  /* ── 스크롤바 숨기기 ── */
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div id="app">
+  <main id="main-content"></main>
+  <nav aria-label="메인 내비게이션">
+    <ul>
+      <li><button class="nav-btn active" data-page="home" onclick="navigate('home')"><span class="icon">🌙</span>홈</button></li>
+      <li><button class="nav-btn" data-page="records" onclick="navigate('records')"><span class="icon">📝</span>기록</button></li>
+      <li><button class="nav-btn" data-page="feeds" onclick="navigate('feeds')"><span class="icon">💬</span>생각들</button></li>
+      <li><button class="nav-btn" data-page="inbox" onclick="navigate('inbox')"><span class="icon">✉️</span>편지함<span id="inbox-badge" style="display:none;margin-left:2px;" class="unread-dot"></span></button></li>
+    </ul>
+  </nav>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  더미 데이터 (시연용)
+// ══════════════════════════════════════════════════════
+const DEMO = {
+  todayQuestion: {
+    questionId: 'q-2026-1108',
+    content: '오늘 하루 중 가장 오래 생각한 것은 무엇인가요?',
+    date: '2026-11-08'
+  },
+  records: [
+    {
+      recordId: 'r-001',
+      rawText: '갑자기 왜 사람들은 남들 시선을 그렇게 신경 쓰는지 궁금해졌다. 나도 그런 것 같고... 사실 내가 어떻게 보이는지 되게 신경 쓰는 것 같은데, 왜 그러는 걸까.',
+      summaryLine: '왜 나는 타인의 시선을 이렇게 신경 쓸까?',
+      tags: ['#자아', '#관계', '#심리'],
+      followups: [
+        { text: '3주 지나서 다시 보니까, 그때보다 덜 신경 쓰게 된 것 같기도? 아니면 익숙해진 건지.', addedAt: '2026-10-29T08:12:00Z' }
+      ],
+      isProcessed: true,
+      createdAt: '2026-10-17T22:34:00Z',
+      daysAgo: 22
+    },
+    {
+      recordId: 'r-002',
+      rawText: '요즘 AI한테 너무 의존하는 것 같다. 뭔가 판단할 때마다 AI한테 물어보게 되고... 나 혼자 결정하는 게 점점 어색해지는 느낌.',
+      summaryLine: 'AI에 의존하면서 스스로 판단하는 능력이 줄어드는 것 같다',
+      tags: ['#AI', '#자립', '#생각'],
+      followups: [],
+      isProcessed: true,
+      createdAt: '2026-11-07T23:01:00Z',
+      daysAgo: 1
+    },
+    {
+      recordId: 'r-003',
+      rawText: '졸업하고 뭐 할지 아직도 모르겠다. 대학원? 취업? 근데 솔직히 뭘 하고 싶은지도 잘 모르겠어.',
+      summaryLine: '졸업 후 방향이 불분명하고 하고 싶은 것을 모르겠다',
+      tags: ['#진로', '#미래', '#불안'],
+      followups: [],
+      isProcessed: true,
+      createdAt: '2026-11-08T22:10:00Z',
+      daysAgo: 0
+    }
+  ],
+  feeds: [
+    {
+      answererUserId: 'user-a',
+      answerText: '오늘 팀 프로젝트 방향을 어떻게 잡을지 계속 머릿속에 맴돌았어요. 잠도 제대로 못 잘 것 같아요.',
+      isAnonymous: true,
+      createdAt: '2026-11-08T22:15:00Z',
+      commentCount: 2
+    },
+    {
+      answererUserId: 'user-b',
+      answerText: '졸업 후 뭘 할지. 주변 다들 이미 방향 정한 것 같은데 나만 모르는 것 같아서 불안해요.',
+      isAnonymous: true,
+      createdAt: '2026-11-08T22:31:00Z',
+      commentCount: 1
+    },
+    {
+      answererUserId: 'user-c',
+      answerText: '부모님한테 솔직하게 말 못하고 있는 게 있는데, 그게 계속 마음에 걸렸어요.',
+      isAnonymous: false,
+      userId: 'Hyunjin',
+      createdAt: '2026-11-08T23:05:00Z',
+      commentCount: 0
+    }
+  ],
+  inboxComments: [
+    {
+      commentId: 'c-001',
+      commenterUserId: 'user-x',
+      commentText: '저도 비슷하게 느껴서 공감이 많이 됐어요. 혹시 어떻게 해결하셨나요?',
+      replyText: null,
+      createdAt: '2026-11-08T23:20:00Z',
+      isRead: false
+    },
+    {
+      commentId: 'c-002',
+      commenterUserId: 'user-y',
+      commentText: '주변 분들이랑 얘기해보셨어요? 저는 얘기하고 나서 좀 가벼워졌던 것 같아요.',
+      replyText: '맞아요, 저도 얘기하고 나니까 조금 달라지더라고요. 근데 쉽지 않더라고요 처음엔.',
+      createdAt: '2026-11-08T23:45:00Z',
+      isRead: true
+    }
+  ]
+}
+
+// ══════════════════════════════════════════════════════
+//  상태
+// ══════════════════════════════════════════════════════
+let state = {
+  currentPage: 'home',
+  inputMode: 'voice',
+  recorderState: 'idle',  // idle | recording | stopped
+  recorderSec: 0,
+  recorderTimer: null,
+  audioBlob: null,
+  audioUrl: null,
+  savedRecord: null,
+  summaryDone: false,
+  feedAnswered: false,
+  feedAnswerText: '',
+  myAnswer: null,
+  selectedFeed: null,      // 댓글 달기 열려 있는 피드
+  commentDrafts: {},       // answererUserId → 댓글 초안
+  selectedRecord: null,    // 기록 상세 중인 recordId
+  followupText: '',
+  showFollowupInput: false,
+  inboxReplyTarget: null,  // commentId
+  inboxReplyText: '',
+  inboxComments: JSON.parse(JSON.stringify(DEMO.inboxComments)),
+  records: JSON.parse(JSON.stringify(DEMO.records)),
+  unreadCount: DEMO.inboxComments.filter(c => !c.isRead).length
+}
+
+// ══════════════════════════════════════════════════════
+//  라우터
+// ══════════════════════════════════════════════════════
+function navigate(page, extra) {
+  if (extra) state[extra.key] = extra.value
+  state.currentPage = page
+  render()
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page)
+  })
+  document.querySelector('#main-content').scrollTop = 0
+}
+
+// ══════════════════════════════════════════════════════
+//  렌더
+// ══════════════════════════════════════════════════════
+function render() {
+  const pages = {
+    home:         renderHome,
+    records:      renderRecords,
+    recordDetail: renderRecordDetail,
+    feeds:        renderFeeds,
+    inbox:        renderInbox,
+  }
+  document.querySelector('#main-content').innerHTML = (pages[state.currentPage] || renderHome)()
+  bindEvents()
+  updateInboxBadge()
+}
+
+function updateInboxBadge() {
+  const badge = document.querySelector('#inbox-badge')
+  const count = state.inboxComments.filter(c => !c.isRead).length
+  badge.style.display = count > 0 ? 'inline-block' : 'none'
+}
+
+// ══════════════════════════════════════════════════════
+//  홈 페이지 (F4 · F1 · F2)
+// ══════════════════════════════════════════════════════
+function renderHome() {
+  const q = DEMO.todayQuestion
+  const today = new Date().toLocaleDateString('ko-KR', { month:'long', day:'numeric', weekday:'long' })
+
+  let recorderUI = ''
+  if (state.inputMode === 'voice') {
+    if (state.recorderState === 'idle') {
+      recorderUI = `
+        <div class="rec-wrap">
+          <button class="rec-btn rec-btn-idle" onclick="startRecording()" aria-label="녹음 시작">🎙</button>
+          <p class="muted">버튼을 눌러 혼잣말하듯 말해보세요</p>
+        </div>`
+    } else if (state.recorderState === 'recording') {
+      const m = String(Math.floor(state.recorderSec / 60)).padStart(2,'0')
+      const s = String(state.recorderSec % 60).padStart(2,'0')
+      recorderUI = `
+        <div class="rec-wrap">
+          <button class="rec-btn rec-btn-stop" onclick="stopRecording()" aria-label="녹음 중지">
+            <div class="pulse-ring"></div>
+            <span style="font-size:22px;font-weight:700;color:#fff;position:relative;z-index:1;">■</span>
+          </button>
+          <p class="rec-timer" aria-live="polite">${m}:${s}</p>
+        </div>`
+    } else {
+      recorderUI = `
+        <div style="display:flex;flex-direction:column;gap:10px;animation:fadeIn .2s ease">
+          <audio controls src="${state.audioUrl || ''}" aria-label="녹음된 음성"></audio>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="resetRecorder()">다시 녹음</button>
+            <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveAudio()">저장하기</button>
+          </div>
+        </div>`
+    }
+  } else {
+    recorderUI = `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <textarea id="text-input" rows="5" placeholder="지금 머릿속에 있는 생각을 그대로 써보세요..."
+          oninput="state.textInput=this.value">${state.textInput||''}</textarea>
+        <button class="btn btn-primary btn-full" onclick="saveText()">기록 남기기</button>
+      </div>`
+  }
+
+  let savedUI = ''
+  if (state.savedRecord) {
+    if (!state.summaryDone) {
+      savedUI = `
+        <div class="card summary-box">
+          <p class="label">✨ 기록 완료</p>
+          <div class="ai-processing"><div class="spinner"></div><span>AI가 생각을 정리하는 중...</span></div>
+        </div>`
+    } else {
+      const r = state.savedRecord
+      savedUI = `
+        <div class="card card-brand summary-box">
+          <p class="label">✨ 핵심 생각</p>
+          <p style="font-size:15px;font-weight:600;line-height:1.5;margin-bottom:10px;">${r.summaryLine}</p>
+          <div class="tags">${r.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="navigate('recordDetail',{key:'selectedRecord',value:'${r.recordId}'})">자세히 보기 →</button>
+        </div>`
+    }
+  }
+
+  return `
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <header>
+        <p class="muted">${today}</p>
+        <h1 style="margin-top:4px;">안녕하세요 👋</h1>
+      </header>
+
+      <section class="card card-brand" aria-labelledby="today-q">
+        <p class="label">🌙 오늘의 질문</p>
+        <p id="today-q" style="font-size:17px;font-weight:600;line-height:1.5;">${q.content}</p>
+      </section>
+
+      <section class="card" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="mode-tabs">
+          <button class="mode-tab ${state.inputMode==='voice'?'active':''}" onclick="setMode('voice')">🎙 음성</button>
+          <button class="mode-tab ${state.inputMode==='text'?'active':''}" onclick="setMode('text')">✏️ 텍스트</button>
+        </div>
+        ${recorderUI}
+      </section>
+
+      ${savedUI}
+    </div>`
+}
+
+// ══════════════════════════════════════════════════════
+//  기록 목록 (F3)
+// ══════════════════════════════════════════════════════
+function renderRecords() {
+  const recs = state.records
+  const cards = recs.map(r => {
+    const isRecall = r.daysAgo >= 14 && r.daysAgo <= 21
+    const dateStr = r.daysAgo === 0 ? '오늘' : r.daysAgo === 1 ? '어제' : `${r.daysAgo}일 전`
+    const recallBadge = isRecall ? `<p style="font-size:11px;font-weight:700;color:#8B6FFF;margin-bottom:6px;">✨ ${r.daysAgo}일 전 생각이에요. 지금은 어떻게 생각하나요?</p>` : ''
+    const followupBadge = r.followups.length > 0 ? `<p class="muted" style="margin-top:6px;">💭 이어 생각 ${r.followups.length}개</p>` : ''
+    return `
+      <li>
+        <button class="card record-card btn-full ${isRecall?'recall':''}" onclick="navigate('recordDetail',{key:'selectedRecord',value:'${r.recordId}'})" style="text-align:left;">
+          ${recallBadge}
+          <p class="record-title">${r.summaryLine}</p>
+          <div class="record-meta">
+            <div class="tags">${r.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+            <span class="muted">${dateStr}</span>
+          </div>
+          ${followupBadge}
+        </button>
+      </li>`
+  }).join('')
+
+  return `
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <h2>내 기록</h2>
+      <ul style="display:flex;flex-direction:column;gap:10px;list-style:none;">${cards}</ul>
+    </div>`
+}
+
+// ══════════════════════════════════════════════════════
+//  기록 상세 (F3 이어 생각)
+// ══════════════════════════════════════════════════════
+function renderRecordDetail() {
+  const r = state.records.find(x => x.recordId === state.selectedRecord)
+  if (!r) return `<p class="secondary">기록을 찾을 수 없습니다.</p>`
+
+  const dateStr = new Date(r.createdAt).toLocaleString('ko-KR', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})
+
+  const followupList = r.followups.map((f,i) => `
+    <li class="followup-item">
+      <p class="followup-text">${f.text}</p>
+      <p class="muted" style="margin-top:6px;">${new Date(f.addedAt).toLocaleString('ko-KR',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}</p>
+    </li>`).join('')
+
+  const followupSection = r.followups.length > 0 ? `
+    <section>
+      <div class="section-header"><p class="section-title">💭 이어 생각</p></div>
+      <ul style="display:flex;flex-direction:column;gap:8px;list-style:none;">${followupList}</ul>
+    </section>` : ''
+
+  const followupInput = state.showFollowupInput ? `
+    <div style="display:flex;flex-direction:column;gap:10px;animation:fadeIn .2s ease;">
+      <textarea id="followup-input" rows="4" placeholder="그때 생각과 지금 생각이 달라졌나요?" oninput="state.followupText=this.value">${state.followupText||''}</textarea>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="state.showFollowupInput=false;state.followupText='';render()">취소</button>
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="addFollowup('${r.recordId}')">추가하기</button>
+      </div>
+    </div>` : `<button class="btn btn-ghost btn-full" onclick="state.showFollowupInput=true;render()">+ 이어 생각 남기기</button>`
+
+  return `
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <button class="back-btn" onclick="navigate('records')">← 기록 목록</button>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <p class="label">원본 기록</p>
+          <span class="muted">${dateStr}</span>
+        </div>
+        <p style="font-size:14px;line-height:1.7;color:var(--text-primary);">${r.rawText}</p>
+      </section>
+
+      ${r.isProcessed ? `
+      <section class="card card-brand">
+        <p class="label">✨ 핵심 생각</p>
+        <p style="font-size:15px;font-weight:600;line-height:1.5;margin-bottom:10px;">${r.summaryLine}</p>
+        <div class="tags">${r.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      </section>` : ''}
+
+      ${followupSection}
+      ${followupInput}
+    </div>`
+}
+
+// ══════════════════════════════════════════════════════
+//  피드 (F5 + 버블 댓글)
+// ══════════════════════════════════════════════════════
+function renderFeeds() {
+  const q = DEMO.todayQuestion
+
+  if (!state.feedAnswered) {
+    return `
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <h2>다른 생각 보기</h2>
+        <section class="card card-brand">
+          <p class="label">🌙 오늘의 질문</p>
+          <p style="font-size:17px;font-weight:600;line-height:1.5;">${q.content}</p>
+        </section>
+        <section class="card" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="lock-hint">
+            <span class="lock-icon">🔒</span>
+            <span>먼저 내 생각을 남겨야 다른 사람들의 생각을 볼 수 있어요.</span>
+          </div>
+          <textarea id="feed-answer" rows="4" placeholder="내 생각을 먼저 써보세요..." oninput="state.feedAnswerText=this.value">${state.feedAnswerText||''}</textarea>
+          <label class="checkbox-row">
+            <input type="checkbox" checked onchange="state.feedAnon=this.checked"/> 익명으로 공유
+          </label>
+          <button class="btn btn-primary btn-full" onclick="submitFeedAnswer()">내 생각 남기기 →</button>
+        </section>
+      </div>`
+  }
+
+  const feedCards = DEMO.feeds.map(feed => {
+    const isOpen = state.selectedFeed === feed.answererUserId
+    const draft = state.commentDrafts[feed.answererUserId] || ''
+    const commentUI = isOpen ? `
+      <div class="comment-input-area">
+        <textarea rows="2" placeholder="이 생각에 대해 한 마디..." style="font-size:13px;"
+          oninput="state.commentDrafts['${feed.answererUserId}']=this.value">${draft}</textarea>
+        <div class="comment-actions">
+          <button class="btn btn-ghost btn-sm" onclick="state.selectedFeed=null;render()">취소</button>
+          <button class="btn btn-primary btn-sm" onclick="postComment('${feed.answererUserId}')">보내기</button>
+        </div>
+      </div>` : ''
+
+    const commenterDisplay = feed.isAnonymous ? '익명' : (feed.userId || '익명')
+    return `
+      <li class="card feed-card">
+        <p class="muted" style="font-size:11px;margin-bottom:4px;">${commenterDisplay}</p>
+        <p class="feed-text">${feed.answerText}</p>
+        <div class="feed-footer">
+          <span class="muted">${new Date(feed.createdAt).toLocaleString('ko-KR',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+          <button class="comment-btn" onclick="toggleComment('${feed.answererUserId}')" aria-expanded="${isOpen}">
+            💬 댓글 달기${feed.commentCount > 0 ? ` (${feed.commentCount})` : ''}
+          </button>
+        </div>
+        ${commentUI}
+      </li>`
+  }).join('')
+
+  return `
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <h2>다른 생각 보기</h2>
+      <section class="card card-brand">
+        <p class="label">🌙 오늘의 질문</p>
+        <p style="font-size:17px;font-weight:600;line-height:1.5;">${q.content}</p>
+      </section>
+      ${state.myAnswer ? `
+      <div class="card" style="border-color:var(--brand-border);background:var(--brand-light);">
+        <p class="label">내 생각</p>
+        <p style="font-size:14px;line-height:1.6;">${state.myAnswer}</p>
+      </div>` : ''}
+      <section>
+        <div class="section-header">
+          <p class="section-title">💬 다른 사람들의 생각 (${DEMO.feeds.length}개)</p>
+        </div>
+        <ul style="display:flex;flex-direction:column;gap:10px;list-style:none;">${feedCards}</ul>
+      </section>
+    </div>`
+}
+
+// ══════════════════════════════════════════════════════
+//  편지함 — 버블 메커니즘
+// ══════════════════════════════════════════════════════
+function renderInbox() {
+  const comments = state.inboxComments
+  const unread = comments.filter(c => !c.isRead).length
+
+  const commentCards = comments.map(c => {
+    const isReplyTarget = state.inboxReplyTarget === c.commentId
+    const replyBubble = c.replyText ? `
+      <div class="reply-bubble">
+        <p class="reply-label">내 답장</p>
+        <p class="reply-text">${c.replyText}</p>
+      </div>` : ''
+
+    const replyInput = isReplyTarget ? `
+      <div class="reply-input-wrap">
+        <textarea rows="3" placeholder="댓글에 답장을 보내세요. 이 분에게만 보여요."
+          oninput="state.inboxReplyText=this.value">${state.inboxReplyText||''}</textarea>
+        <p class="reply-hint">🔒 이 분에게만 보이는 1:1 답장이에요.</p>
+        <div class="comment-actions">
+          <button class="btn btn-ghost btn-sm" onclick="state.inboxReplyTarget=null;state.inboxReplyText='';render()">취소</button>
+          <button class="btn btn-primary btn-sm" onclick="sendReply('${c.commentId}')">보내기</button>
+        </div>
+      </div>` : ''
+
+    const replyBtn = !c.replyText && !isReplyTarget
+      ? `<button class="comment-btn" onclick="openReply('${c.commentId}')">답장하기 →</button>`
+      : (c.replyText && !isReplyTarget ? `<button class="comment-btn" style="font-size:11px;" onclick="openReply('${c.commentId}')">답장 수정</button>` : '')
+
+    return `
+      <li class="card inbox-card" style="${!c.isRead?'border-color:var(--brand-border);':''}" >
+        ${!c.isRead ? `<span class="badge-new">새 댓글</span>` : ''}
+        <div>
+          <p class="muted" style="font-size:11px;margin-bottom:4px;">익명</p>
+          <p style="font-size:14px;line-height:1.6;">${c.commentText}</p>
+          <p class="muted" style="margin-top:4px;">${new Date(c.createdAt).toLocaleString('ko-KR',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}</p>
+        </div>
+        ${replyBubble}
+        ${replyInput}
+        ${replyBtn}
+      </li>`
+  }).join('')
+
+  return `
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <h2>편지함</h2>
+        ${unread > 0 ? `<span style="background:var(--brand);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;">${unread}</span>` : ''}
+      </div>
+      <p class="secondary" style="font-size:13px;">내 답변에 달린 댓글이에요. 답장하고 싶은 댓글에만 선택적으로 답장할 수 있어요.</p>
+      <ul style="display:flex;flex-direction:column;gap:10px;list-style:none;">${commentCards}</ul>
+    </div>`
+}
+
+// ══════════════════════════════════════════════════════
+//  이벤트 핸들러
+// ══════════════════════════════════════════════════════
+function bindEvents() {}  // 인라인 onclick 사용
+
+function setMode(mode) {
+  state.inputMode = mode
+  state.recorderState = 'idle'
+  clearRecorderTimer()
+  render()
+}
+
+// ── 녹음 ──
+let mediaRecorder = null
+let audioChunks = []
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
+    mediaRecorder = new MediaRecorder(stream, { mimeType })
+    audioChunks = []
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data) }
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, { type: mimeType })
+      state.audioBlob = blob
+      state.audioUrl = URL.createObjectURL(blob)
+      stream.getTracks().forEach(t => t.stop())
+      render()
+    }
+    mediaRecorder.start(250)
+    state.recorderState = 'recording'
+    state.recorderSec = 0
+    state.recorderTimer = setInterval(() => { state.recorderSec++; render() }, 1000)
+    render()
+  } catch(e) {
+    // 마이크 권한 없을 때 — 더미 음성으로 시연
+    state.recorderState = 'recording'
+    state.recorderSec = 0
+    state.recorderTimer = setInterval(() => { state.recorderSec++; render() }, 1000)
+    render()
+  }
+}
+
+function stopRecording() {
+  clearRecorderTimer()
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop()
+    state.recorderState = 'stopped'
+  } else {
+    // 더미 모드
+    state.recorderState = 'stopped'
+    state.audioUrl = null
+    render()
+  }
+}
+
+function clearRecorderTimer() {
+  if (state.recorderTimer) { clearInterval(state.recorderTimer); state.recorderTimer = null }
+}
+
+function resetRecorder() {
+  clearRecorderTimer()
+  if (state.audioUrl) URL.revokeObjectURL(state.audioUrl)
+  state.recorderState = 'idle'
+  state.audioBlob = null
+  state.audioUrl = null
+  state.recorderSec = 0
+  render()
+}
+
+// ── 텍스트 저장 (F1 → F2) ──
+function saveText() {
+  const text = state.textInput || document.querySelector('#text-input')?.value || ''
+  if (!text.trim()) return
+  const newRecord = {
+    recordId: 'r-new-' + Date.now(),
+    rawText: text.trim(),
+    summaryLine: '',
+    tags: [],
+    followups: [],
+    isProcessed: false,
+    createdAt: new Date().toISOString(),
+    daysAgo: 0
+  }
+  state.records.unshift(newRecord)
+  state.savedRecord = newRecord
+  state.summaryDone = false
+  state.textInput = ''
+  render()
+  // AI 처리 시뮬레이션 (1.8초 후 요약 완료)
+  setTimeout(() => {
+    newRecord.summaryLine = summarizeText(text)
+    newRecord.tags = extractTags(text)
+    newRecord.isProcessed = true
+    state.summaryDone = true
+    render()
+  }, 1800)
+}
+
+function saveAudio() {
+  const newRecord = {
+    recordId: 'r-audio-' + Date.now(),
+    rawText: '(음성 녹음 — Transcribe 처리 중)',
+    summaryLine: '',
+    tags: [],
+    followups: [],
+    isProcessed: false,
+    createdAt: new Date().toISOString(),
+    daysAgo: 0
+  }
+  state.records.unshift(newRecord)
+  state.savedRecord = newRecord
+  state.summaryDone = false
+  resetRecorder()
+  render()
+  setTimeout(() => {
+    newRecord.rawText = '요즘 AI한테 너무 의존하는 것 같다는 생각이 들었다. 스스로 판단하는 게 점점 줄어드는 것 같아서 좀 불안하다.'
+    newRecord.summaryLine = 'AI 의존도가 높아지면서 스스로 판단하는 능력이 줄어드는 것 같아 불안하다'
+    newRecord.tags = ['#AI', '#자립', '#불안']
+    newRecord.isProcessed = true
+    state.summaryDone = true
+    render()
+  }, 2200)
+}
+
+// 간단한 더미 요약 로직
+function summarizeText(text) {
+  if (text.length <= 40) return text
+  const sentences = text.split(/[.?!。]/g).filter(s => s.trim().length > 5)
+  return (sentences[0] || text).trim().slice(0, 55) + (text.length > 55 ? '...' : '')
+}
+function extractTags(text) {
+  const keywords = [
+    ['AI','인공지능'], ['관계','친구','사람'], ['진로','취업','직장','대학원'],
+    ['불안','걱정','두려'], ['일상','하루'], ['자아','나','정체성'], ['감정','감사','행복'],
+    ['성장','배움'], ['미래','꿈'], ['가족','부모']
+  ]
+  const found = []
+  for (const [tag, ...words] of keywords) {
+    if ([tag,...words].some(w => text.includes(w))) found.push('#' + tag)
+    if (found.length >= 3) break
+  }
+  return found.length ? found : ['#생각', '#일상']
+}
+
+// ── 피드 답변 제출 (F5) ──
+function submitFeedAnswer() {
+  const text = state.feedAnswerText || document.querySelector('#feed-answer')?.value || ''
+  if (!text.trim()) return
+  state.feedAnswered = true
+  state.myAnswer = text.trim()
+  render()
+}
+
+// ── 댓글 달기 (버블) ──
+function toggleComment(answererUserId) {
+  state.selectedFeed = state.selectedFeed === answererUserId ? null : answererUserId
+  render()
+}
+
+function postComment(answererUserId) {
+  const text = state.commentDrafts[answererUserId] || ''
+  if (!text.trim()) return
+  const feed = DEMO.feeds.find(f => f.answererUserId === answererUserId)
+  if (feed) feed.commentCount++
+  // 내 편지함에 새 댓글 추가 (시연용: 내가 동시에 답변자이기도 함)
+  state.inboxComments.unshift({
+    commentId: 'c-new-' + Date.now(),
+    commenterUserId: 'user-demo',
+    commentText: text.trim(),
+    replyText: null,
+    createdAt: new Date().toISOString(),
+    isRead: false
+  })
+  delete state.commentDrafts[answererUserId]
+  state.selectedFeed = null
+  updateInboxBadge()
+  render()
+  // 성공 메시지 (토스트 없이 간단히)
+  alert('댓글이 등록되었습니다. 답변자가 선택적으로 답장할 수 있어요.')
+}
+
+// ── 이어 생각 추가 (F3) ──
+function addFollowup(recordId) {
+  const text = state.followupText || document.querySelector('#followup-input')?.value || ''
+  if (!text.trim()) return
+  const record = state.records.find(r => r.recordId === recordId)
+  if (record) {
+    record.followups.push({ text: text.trim(), addedAt: new Date().toISOString() })
+  }
+  state.followupText = ''
+  state.showFollowupInput = false
+  render()
+}
+
+// ── 편지함 답장 (버블) ──
+function openReply(commentId) {
+  // 읽음 처리
+  const c = state.inboxComments.find(x => x.commentId === commentId)
+  if (c) c.isRead = true
+  state.inboxReplyTarget = commentId
+  state.inboxReplyText = c?.replyText || ''
+  render()
+}
+
+function sendReply(commentId) {
+  const text = state.inboxReplyText || document.querySelector('textarea')?.value || ''
+  if (!text.trim()) return
+  const c = state.inboxComments.find(x => x.commentId === commentId)
+  if (c) {
+    c.replyText = text.trim()
+    c.isRead = true
+  }
+  state.inboxReplyTarget = null
+  state.inboxReplyText = ''
+  updateInboxBadge()
+  render()
+}
+
+// ══════════════════════════════════════════════════════
+//  초기 렌더
+// ══════════════════════════════════════════════════════
+render()
+</script>
+</body>
+</html>
